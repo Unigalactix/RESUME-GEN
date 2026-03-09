@@ -1,6 +1,6 @@
 import streamlit as st
 from data_loader import load_all_data
-from matcher import match_skills, format_bullet_points
+from matcher import match_skills, format_bullet_points, evaluate_relevance
 from markdown_generator import create_markdown_resume
 from pdf_generator import generate_pdf_from_markdown
 
@@ -35,24 +35,26 @@ if st.button("Generate Tailored Resume"):
             # 1. Match Skills
             top_skills = match_skills(data['skills'], jd, top_n=15)
             
-            # 2. Format and sort experience bullets
+            # 2. Filter, Format and sort experience bullets
             tailored_experience = []
             for job in data['positions']:
-                bullets = format_bullet_points(job['description'], jd)
-                # Keep top 4 most relevant bullets
-                job_copy = job.copy()
-                job_copy['bullets'] = bullets[:4]
-                if job_copy['bullets']: # Only append if there's actual content
-                    tailored_experience.append(job_copy)
+                if evaluate_relevance(job['description'], jd):
+                    bullets = format_bullet_points(job['description'], jd)
+                    # Keep top 4 most relevant bullets
+                    job_copy = job.copy()
+                    job_copy['bullets'] = bullets[:4]
+                    if job_copy['bullets']: 
+                        tailored_experience.append(job_copy)
 
-            # 3. Format project bullets (no sorting for now, just formatting)
+            # 3. Filter and Format project bullets
             tailored_projects = []
             for proj in data['projects']:
-                bullets = format_bullet_points(proj['description'], None) # No sorting
-                proj_copy = proj.copy()
-                proj_copy['bullets'] = bullets
-                if proj_copy['bullets']:
-                    tailored_projects.append(proj_copy)
+                 if evaluate_relevance(proj['description'], jd):
+                    bullets = format_bullet_points(proj['description'], jd) # Use JD to format projects too
+                    proj_copy = proj.copy()
+                    proj_copy['bullets'] = bullets[:3] # Max 3 bullets for projects
+                    if proj_copy['bullets']:
+                        tailored_projects.append(proj_copy)
 
             # 4. Generate Initial Markdown
             if 'resume_md' not in st.session_state:

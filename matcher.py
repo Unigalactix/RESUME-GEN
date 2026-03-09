@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 import json
 import re
+from resume_formatter import ATS_SYSTEM_INSTRUCTION
 
 load_dotenv()
 
@@ -58,10 +59,38 @@ def match_skills(skills, job_description, top_n=15):
         print(f"Error in match_skills with Gemini: {e}")
         return skills[:top_n]
 
+def evaluate_relevance(description, job_description):
+    """
+    Evaluates if a given job/project description is actually relevant to the JD.
+    Returns True if relevant enough to include, False otherwise.
+    """
+    if not description or not job_description or not api_key:
+        return True # Default to keep if no JD or API key
+
+    prompt = f"""
+    Job Description:
+    {job_description}
+
+    Candidate Experience:
+    {description}
+
+    Is this candidate experience relevant enough to the Job Description to be included on a highly targeted 1-page resume? 
+    Reply ONLY with 'YES' or 'NO'.
+    """
+    try:
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        response = model.generate_content(prompt)
+        text = response.text.strip().upper()
+        return 'YES' in text
+    except Exception as e:
+        print(f"Error evaluating relevance: {e}")
+        return True
+
 def format_bullet_points(description, job_description=None):
     """
     If JD is provided, uses Gemini to rewrite and organize experience bullet points 
-    to highlight relevance to the JD. Otherwise, just splits by newlines/bullets.
+    to highlight relevance to the JD using strict ATS formatting rules. 
+    Otherwise, just splits by newlines/bullets.
     """
     if not description:
         return []
@@ -71,16 +100,16 @@ def format_bullet_points(description, job_description=None):
         return [b.strip() for b in bullets if b.strip()]
 
     prompt = f"""
-    Here is a Job Description:
+    {ATS_SYSTEM_INSTRUCTION}
+    
+    Target Job Description:
     {job_description}
     
-    Here is a candidate's experience description for a specific role:
+    Original Candidate Experience:
     {description}
     
-    Rewrite this experience into 3-4 professional bullet points that highlight the candidate's fit for the Job Description. 
-    Keep it truthful to the original text but emphasize relevant aspects (impact, metrics, relevant tech).
+    Rewrite this experience into 3-4 professional bullet points enforcing ALL system instructions (XYZ formula, action verbs, metrics, absolutely no pronouns).
     Return ONLY a JSON array of strings containing the bullet points WITHOUT bullet characters (like -, •). 
-    Do not wrap in markdown quotes.
     """
     
     try:
