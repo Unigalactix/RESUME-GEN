@@ -1,0 +1,186 @@
+Date/Time,Media Description,Media Link
+"You uploaded a video on March 8, 2026 at 4:05 AM (GMT)", -,https://dms.licdn.com/playlist/vid/dynamic/D5605AQFsKfrPFNVZow/BAgrOdR_j6hUapbLA?e=1773691200&v=beta&t=emBOEM3je5iBGRk2LXKNc3IRsMoMAm6_uSomWKl44Wg
+"You uploaded a photo on February 13, 2026 at 3:16 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D562DAQFGwD7KkezvpA/profile-treasury-image-shrink_8192_8192/B56ZxU__HfH8Ag-/0/1770952587779?e=1773691200&v=beta&t=fFXbHazQ7fdyA6WRt8ftO_6ycJdpFWeEdMMVv6XqbLI
+"You uploaded a video on February 4, 2026 at 9:00 PM (GMT)", -,https://dms.licdn.com/playlist/vid/dynamic/D5605AQEpPtdUx75gug/BAQgZKAoIs?e=1773691200&v=beta&t=36mbsShYs0OOLIqL2cIPW8fBe5Ed-nsj75R9yydD6uQ
+"You uploaded a feed document on January 27, 2026 at 10:26 PM (GMT)","????????: ??? ""???????"" ??? ?? ????. ??? ???????? ????? ??? ?? ????. ?
+I?ve been exploring the next evolution of AI, and it isn?t happening in a walled garden?it?s open-source, it lives on your local machine, and it actually does things.
+
+Meet ????????.
+https://clawd.bot/
+
+Unlike standard LLMs that just generate text, Clawdbot is a ""smart model with eyes and hands"" that accesses your computer to perform real-world tasks,. It connects directly to the apps you already use?WhatsApp, Telegram, Slack, or iMessage?and acts as a 24/7 assistant with persistent memory,.
+
+??? ???? ??????? ?? ????????? ??? ????????? ?????????'? ?????????:
+? ?? ??????? ??? ???????: Clawdbot runs locally (macOS, Linux, Windows) and can control your browser, file system, and shell,. It?s not just a chat; it?s a ""smart model... at a desk with keyboard and mouse"".
+? ???? ??????????: Users aren?t just chatting; they are running their companies, managing code reviews, and automating content pipelines. One user even had their bot successfully dispute a rejected insurance claim by finding a misinterpretation in the policy,.
+? ??????? & ????????: Your data and context stay on your machine. It supports models from Anthropic and OpenAI, or local models for complete privacy.
+
+As one user put it, this feels like the first time we are ""living in the future since the launch of ChatGPT"",. Another described it as the ""endgame of digital employees"",.
+
+It?s open-source, extensible with 50+ integrations (from Spotify to Obsidian), and yes?the mascot is a lobster ?,.
+
+If you want to own your AI infrastructure rather than rent it, this is the project to watch.
+
+#AI #OpenSource #Clawdbot #ArtificialIntelligence #Automation #FutureOfWork",https://media.licdn.com/dms/document/media/v2/D561FAQEBHfXQ0ZvzQA/feedshare-document-chunked-pdf/B56ZwBkMJAIsBk-/0/1769552792107?e=1773691200&v=beta&t=Vj9PIIF6Ps1Th-fSGi_lbabP1UVXcQGCPdHETHWZ8Ro
+"You uploaded a feed document on January 21, 2026 at 6:00 PM (GMT)","????????: Bridging the gap between DevOps and AI. ?
+
+I?m excited to share a demo project I?ve been working on under the guidance of Prasanth Venkata Satya Tammiraju/Quadrant Technologies. I built ""???? ??? ??????????""?an autonomous agent designed to reduce the friction between project management and code deployment.
+
+The goal was to build a service that doesn't just ""alert"" you about a ticket, but actively starts working on it.
+
+Key features I implemented:?
+? ?????????????: Built a Node.js service that polls Jira and detects project requirements automatically.?
+? ?? ???????????: Leveraged GitHub Copilot to draft initial code fixes and workflows based on the ticket description.?
+? ????? ?????????: The agent parses repo files (like package.json or pom.xml) to identify the tech stack without manual config .?
+? ????? ??????????: Automated the generation of Dockerfiles for Azure Web App deployment.
+
+
+This project was a fantastic opportunity to dive deep into CI/CD pipelines, Node.js, and Agentic AI.
+
+Big thanks to my mentors Prasanth Venkata Satya Tammiraju and Harish Nagunuri for the guidance on the architecture design!
+
+#SoftwareEngineering #DevOps #AI #ProjectShowcase #Learning #Cloud Microsoft Microsoft AI Skills",https://media.licdn.com/dms/document/media/v2/D561FAQHHwgZZmoR1Pg/feedshare-document-sanitized-pdf/B56Zvht3e0GYA8-/0/1769018457797?e=1773691200&v=beta&t=P5d9hHSoGRS7hLy8Kz6hgUYgip5mpAmc_Y-MwKnIkyY
+"You uploaded a feed photo on January 7, 2026 at 9:06 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQHBPt7qi2VxBw/feedshare-shrink_800/B56ZuaSK3HG0Ag-/0/1767820013243?e=1774483200&v=beta&t=27AbXSt4uCuNRhJ2mLhj-6YoBUsq7_bhCx5RyFXG9kw
+"You uploaded a feed photo on January 7, 2026 at 7:10 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQHVdYcinwyQ2w/feedshare-shrink_480/B56ZuZ3ixJHgAY-/0/1767813033365?e=1774483200&v=beta&t=OJV0ylOLpx0QREUxIDYZBTxpQxpTYPds6Ho7p38RBb0
+"You uploaded a feed document on January 6, 2026 at 11:02 PM (GMT)","????? ?? ???? ??? ??? ?????? ?????????. ?
+
+If you?ve dealt with the ""dependency hell"" of local AI setup, Docker Model Runner (DMR) changes the game by standardizing models as OCI artifacts.
+
+??? ??? ?? ??? ??? ????????:
+
+???????????: It uses a ""Host-Native Engine"" to bypass virtualization, giving you direct, low-latency access to GPU hardware (Metal/CUDA).
+
+???????????: Switch seamlessly between backends?use llama.cpp for efficient prototyping or vLLM for high-throughput production.
+
+??????????: Integrate models directly into your services stack with standard Docker Compose.
+
+No more complex configurations. Just run:
+
+?????? ????? ??? ??/?????3.2:8?-?4_?_?
+
+#Docker #AI #LocalLLM #DevOps #GenerativeAI #vLLM #LlamaCpp",https://media.licdn.com/dms/document/media/v2/D561FAQFeuHWC6gYJRg/feedshare-document-url-metadata-scrapper-pdf/B56ZuVjJJdKEA4-/0/1767740577897?e=1773691200&v=beta&t=DpmzNUTaVecHqQ4IQSjz94A_0I5E7X5WCnjfOQRMUqo
+"You uploaded a photo on January 5, 2026 at 11:17 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5603AQHfiG38GvjX6Q/profile-displayphoto-scale_400_400/B56ZuQc8CpJYAg-/0/1767655072990?e=1774483200&v=beta&t=4jYzmS0mnLuEzfGV5j37rAMMKwYwNvD3m1l1ydwHCF8
+"You uploaded a profile photo on January 5, 2026 at 11:17 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5604AQE9gwdNubyuxQ/profile-originalphoto-shrink_900_1200/B56ZuQc7_0HAAM-/0/1767655070422?e=1774483200&v=beta&t=E6tXZQrGBewQtlGAysOcxC3OuE1zGopZ2IPQRot4RD0
+"You uploaded a feed photo on December 15, 2025 at 8:19 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQF63P1o44HUIQ/feedshare-shrink_160/B56ZshGCHXGgAc-/0/1765786788580?e=1774483200&v=beta&t=nTTLO48tjO_rZyPEDrfMyAEyS0MemNVBmkoaae_nNGo
+"You uploaded a feed photo on December 15, 2025 at 8:00 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQENtorfmj1lAw/feedshare-shrink_20/B56ZshBtQ9I8A0-/0/1765785654750?e=1774483200&v=beta&t=Vbpkb5aAvWfGmeLo05vMyNBp2No7l4qzFQV59yxMYS4
+"You uploaded a feed photo on December 15, 2025 at 7:09 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQFYm3J1M3SNOw/feedshare-shrink_480/B56Zsg1943HYAY-/0/1765782576916?e=1774483200&v=beta&t=MEDeWT_fdoJb7Dm0uoZK_nRzoc5iLfCznS2V5z7Ntps
+"You uploaded a feed photo on December 15, 2025 at 6:53 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQGLv5jhpiKJ0Q/feedshare-shrink_20/B56ZsgyY9eI8A0-/0/1765781639250?e=1774483200&v=beta&t=uMZdDIGuL-h-S_LT-S3ESrp4edUljJ_z6ZZWoGGwWfs
+"You uploaded a feed photo on December 15, 2025 at 6:34 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQE9lTaYF8hPKQ/feedshare-shrink_800/B56Zsgt4TXJUAg-/0/1765780456901?e=1774483200&v=beta&t=osIjfM2pvth6b4vDnOOoeiGHJ-x3DTUo_mg6vZWyFYU
+"You uploaded a feed photo on December 15, 2025 at 6:34 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQFP_5QWdktH9w/feedshare-shrink_480/B56Zsgt2bRGsAc-/0/1765780449219?e=1774483200&v=beta&t=_IKHAQ07IatwKJ5zH3foT2eo-NF3gZmJXkphlr0eV6U
+"You uploaded a feed photo on December 15, 2025 at 6:08 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQFnVIyn9XKvfQ/feedshare-shrink_800/B56ZsgoDV8G4Ak-/0/1765778929276?e=1774483200&v=beta&t=1zBpslPpKKPCskiroU8a-zCPtj7pyJH5_vnoi7DVrXA
+"You uploaded a feed photo on December 15, 2025 at 5:44 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQFqSHrQ5Zrlhw/feedshare-shrink_480/B56ZsgikEXIEAg-/0/1765777490433?e=1774483200&v=beta&t=86bhaHRxRXUarb0FfUQS6kZK61LOYH6x3sbd517SUR8
+"You uploaded a feed photo on December 15, 2025 at 5:40 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQFTib3PbWTqSw/feedshare-shrink_2048_1536/B56Zsghq75I4A0-/0/1765777256478?e=1774483200&v=beta&t=HOTMDRArIqTPRC1HKIq2bAGVtDngw-DG2ol1Ie6eabY
+"You uploaded a feed photo on December 15, 2025 at 5:24 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQF8lUXWpc2vxg/feedshare-shrink_480/B56Zsgd5qTI4AY-/0/1765776268170?e=1774483200&v=beta&t=XJcgFtAGSlvZUKeR-FXfPUGYXfIe1JnEQzJcSkIWeUY
+"You uploaded a feed photo on December 15, 2025 at 5:22 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQHT_4pwprbR8A/feedshare-shrink_800/B56ZsgdZs1IkAg-/0/1765776137232?e=1774483200&v=beta&t=3BiWWo6G9g290D1gvS8MOf_lvw3xH0ovoQHCZa5HZ6c
+"You uploaded a feed photo on December 15, 2025 at 4:53 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQEKzMi2Xz5Mew/feedshare-shrink_800/B56ZsgW5RLKQAs-/0/1765774431577?e=1774483200&v=beta&t=Y_qQCOjHYT-Ae9u4qUi6YdDmCvNl6xHYp7lJIDpBDiw
+"You uploaded a feed photo on December 15, 2025 at 4:51 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQF7IDHPVgA8Kg/feedshare-shrink_480/B56ZsgWYS9JsAY-/0/1765774296482?e=1774483200&v=beta&t=bKvc6XXqKnToIygkXRFG8uY8kDV7CEzt88W05JqpDBA
+"You uploaded a feed document on November 25, 2025 at 9:16 PM (GMT)","?.?. ??? ??? ?? ????????? ?? ????????????? ???? ?? ???????? ??? ????? ?? ??????????.
+
+The topic centers on ??????.??, an open, simple Markdown format adopted by over 20,000 open-source projects. Fundamentally, AGENTS.md acts as the ?????? ??? ??????, providing a predictable place for instructions and context that might otherwise clutter a human-focused README.md.
+
+The essential takeaway is that you are not simply writing documentation, but actively ???????? ?? ????????. When you write to AGENTS.md, you are building up ????????????? ????????? ???? ???????? ?????? ????????. This makes the agent ""smarter"" as your project evolves, unlike a forgetful bot.
+
+To maximize effectiveness, the sources highlight that instruction must be ????????. The most successful AGENTS.md files:
+
+? Provide a clear role or persona (e.g., @docs-agent, @test-agent).
+
+? Detail ?????????? ???????? (e.g., pnpm install, npm test).
+
+? Set ????? ?????????? using a three-tier structure (always do, ask first, never do).
+
+Ultimately, the rise of AGENTS.md and similar Markdown-based files signals a philosophical shift toward ?????????????-?????? ??????????? (???). In the AI-Native era, Markdown is becoming the new ""declarative language,"" moving development from orchestrating infrastructure (via YAML, in the Cloud-Native era) to ????????????? ???????????? (via specifications like AGENTS.md), representing a paradigm of ???????????? ?? ????????????? and ?????????.
+
+The meta-tip for working with your coding agent is simple: ?? ??? ???? ???????? ?????? ??? ???? ??????????? ?????, ??? ?? ?? ??????.?? ???????.
+
+#NotebookLM Microsoft Copilot #AI #AGENTS #README",https://media.licdn.com/dms/document/media/v2/D561FAQHVRVeiECfJXg/feedshare-document-url-metadata-scrapper-pdf/B56Zq84EcII8A0-/0/1764105412159?e=1773691200&v=beta&t=jXxdeUT1CdOhwJCP2hKd1HUbZCqZ0hUfjmTsKAHOASI
+"You uploaded a feed document on November 21, 2025 at 7:34 PM (GMT)","??;??: The Agent Era is Here. Microsoft is building the operating system for your robot workforce.
+? ????? ???: Introduced as the central control plane to deploy, secure, monitor, and govern every AI agent (Microsoft, open-source, or third-party) across the organization, solving the ""Shadow AI"" problem.
+? ??? ?? ?????: A new intelligence architecture (Work IQ, Foundry IQ, Fabric IQ) providing agents with permission-aware knowledge, context, and ""memory"" to make better decisions and reduce hallucinations.
+? ????? ???????????: Azure AI Foundry (rebranded AI Studio) now hosts Anthropic?s Claude models alongside OpenAI and other leading models, positioning Azure as the neutral ground for multi-model AI strategy.
+? ???????? ???????????????: Security Copilot is now included for all Microsoft 365 E5 customers at no additional cost.
+? ?????????? ????????: Predictive Shielding in Defender uses AI to anticipate attacker movement and automatically harden vulnerable paths before exploitation.
+? ?????????? ???????????: GitHub Copilot Coding Agent acts as an autonomous digital teammate capable of reproducing bugs, writing fixes, and submitting Pull Requests without human intervention.
+? ?????????? ????: New application agents like the Sales Development Agent (fully autonomous lead nurturing) and enhanced Word, Excel, and PowerPoint Agents now handle complex, multi-step tasks.
+? ??? ????????: Windows 365 Link is a dedicated $349 thin-client device designed exclusively for secure, stateless streaming of Cloud PCs.
+? ?????? ????? ???: Azure Virtual Desktop for hybrid environments (Limited Preview) extends cloud-native VDI management to existing on-premises infrastructure (Hyper-V, Nutanix AHV, VMware vSphere) via Azure Arc.
+? ??????????? ?????: Microsoft is pivoting its commercial model toward Copilot Credits and ""Agent Acts,"" paying for the autonomous output of AI rather than traditional per-user seats.
+
+Microsoft Microsoft AI Skills #MSIgnite #PowerBI #OneLake #MicrosoftFabric",https://media.licdn.com/dms/document/media/v2/D561FAQH6EWBMy6xtoA/feedshare-document-chunked-pdf/B56Zqn6SXbJQBo-/0/1763753672445?e=1773691200&v=beta&t=VplNx3x7Yowc4UoCsylV1AsMq5T8IQYLgAOW174LPqk
+"You uploaded a feed document on November 21, 2025 at 5:33 PM (GMT)","P.S. If you're building with LLMs, remember that context is currency.
+The foundational idea behind the ?????-???????? ?????? ???????? (????) is ""Sparse Trees, Dense Lists"". This format achieves its efficiency by combining YAML-like indentation for nested objects (the ""sparse trees"") with a compact, CSV-style tabular layout for uniform arrays (the ""dense lists"").
+
+This design helps eliminate the repetitive keys and braces of JSON, leading to a token reduction of approximately 30?60% for uniform data sets, which directly cuts API costs in LLM and RAG workflows.
+You can integrate TOON as the communication layer between your code and the LLM:
+
+? ? ?????? ?????: Install the community-driven Python implementation, which is currently in Beta status (v0.9.x) and working toward full spec compliance.
+
+? ? ?????????? ?????: The format has spec-driven implementations available in languages including TypeScript.
+
+? ????? ????: You can convert ???? ?? ???? to visualize how much token ""fat"" you can trim from your prompts.
+
+Video: https://lnkd.in/gg7YzxPD
+
+#MadeWithNotebookLM",https://media.licdn.com/dms/document/media/v2/D561FAQF3ZGJJ9z1eSA/feedshare-document-url-metadata-scrapper-pdf/B56ZqnenzuHkA4-/0/1763746417903?e=1773691200&v=beta&t=53wz4LjH54bUgEW80nfrDdIz6CleTC9nvXShUPrHzR0
+"You uploaded a video on November 12, 2025 at 7:06 PM (GMT)", -,https://dms.licdn.com/playlist/vid/dynamic/D5605AQGc1ZoA_0MqNw/BAgbFdrvXvDWFn1Cw?e=1773691200&v=beta&t=g2iqYZfc3AWaIL13W_eS4r0UA_nG7toDqLyygXtCAxM
+"You uploaded a video on October 31, 2025 at 7:23 PM (GMT)", -,https://dms.licdn.com/playlist/vid/dynamic/D5605AQEfsIMPcQq-oA/BAg_xoOxM-s-r_JbA?e=1773691200&v=beta&t=msy6ajzqivM1YtPiJY9kRlNOsLoAxHLNcoa-XfXAEL0
+"You uploaded a video on October 25, 2025 at 10:25 PM (GMT)", -,https://dms.licdn.com/playlist/vid/dynamic/D5605AQHANq45UNO71g/BAQCQhc1-o?e=1773691200&v=beta&t=8DyKvaOjfzFhq_uOM6zpp3D1TR3vIxfWE3WaAQZYZUo
+"You uploaded a video on October 23, 2025 at 11:25 PM (GMT)", -,https://dms.licdn.com/playlist/vid/dynamic/D4E05AQEh2Cdu887z_Q/BAQ-5qg6_Q?e=1773691200&v=beta&t=CWurDY82DmBfCU3lfWlemO-qqeG5tgko8S_ckp40BvU
+"You uploaded a feed photo on October 22, 2025 at 3:33 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQGz6Rp8JuQNPg/feedshare-shrink_160/B56ZoMjbr2I4Ac-/0/1761147207156?e=1774483200&v=beta&t=o6qSJ9iUcG5wbutOfXf45Q5_NOhPwwl8CRYqBnuv7BI
+"You uploaded a feed photo on October 22, 2025 at 3:33 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQEwB5dyAbx4Yw/feedshare-shrink_480/B56ZoMjbrZJwAY-/0/1761147207243?e=1774483200&v=beta&t=yVKnD9uyOGM7a20Doc2YygBH-iUshLaNzIKGjgUeqr8
+"You uploaded a feed photo on October 22, 2025 at 3:33 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQEVoSivHfOWxg/feedshare-shrink_480/B56ZoMjbrLHIAY-/0/1761147207213?e=1774483200&v=beta&t=POnDmlEvFuh5TWj7xSGhHVDIZ8HTfG2aCF-XVXpBzKA
+"You uploaded a feed photo on October 22, 2025 at 3:33 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQGmLe_Y-gBIGw/feedshare-shrink_480/B56ZoMjbqpG4AY-/0/1761147207191?e=1774483200&v=beta&t=YBDjQBEpzz8P1fU2_2jYe-AIv7xbXETDeT6NNC9actY
+"You uploaded a feed photo on September 8, 2025 at 3:05 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQEu7MntXbV3iQ/feedshare-shrink_20/B56Zkp3Ky0I0A0-/0/1757343952868?e=1774483200&v=beta&t=yXq52RaZ6wXR6WZZ8pCJfkRpJvvsr3OtVnzKqxmb2Bw
+"You uploaded a feed photo on August 31, 2025 at 7:28 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQE7K61_bzqUWQ/feedshare-shrink_160/B56Zj_Bs3lIAAc-/0/1756625293668?e=1774483200&v=beta&t=icS9Wfz22_VptEaijeg7sNFxX1cXq0jW87nqd4JUEV4
+"You uploaded a feed photo on August 29, 2025 at 1:59 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D4E22AQHRWsLDfOKq_w/feedshare-shrink_480/B4EZjzjQ0nHgAc-/0/1756432765353?e=1774483200&v=beta&t=ImfbPO6u4OoVFurucnZZwPns9cz-43bQeLmJAs98eOg
+"You uploaded a feed photo on August 27, 2025 at 8:38 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQEU-8X4Vj7gIg/feedshare-shrink_800/B56ZjtQOSbG0Ag-/0/1756327110055?e=1774483200&v=beta&t=bxZhlOhi6bYqaeLLRV0p0WULIg4gE8I9cYX4k5m82Os
+"You uploaded a feed photo on August 27, 2025 at 8:25 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQHGAt8mcU_ynw/feedshare-shrink_480/B56ZjtNMNfHAAc-/0/1756326315235?e=1774483200&v=beta&t=XDnZCAk82jpP4qKjseQ3v0UsyYkf0lH2sdXV0-XhmfI
+"You uploaded a feed photo on August 27, 2025 at 8:13 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQE4QGpWeQX5nQ/feedshare-shrink_20/B56ZjtKespHUA0-/0/1756325604429?e=1774483200&v=beta&t=0VaioH7UgVx05LKXuZyMulE_ErlmLaDDFcx1w68z1HQ
+"You uploaded a feed photo on August 27, 2025 at 2:21 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQHYo1I3hLCKMw/feedshare-shrink_2048_1536/B56ZjpVNMyG4A8-/0/1756261342490?e=1774483200&v=beta&t=0enH7_Dm9RUGruoRtX3yU1YebQbnPqE0CIZzM6tlGgw
+"You uploaded a feed photo on August 22, 2025 at 4:17 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQEQxlUGPoSeCg/feedshare-shrink_2048_1536/B56ZjSkbaoH8A0-/0/1755879422510?e=1774483200&v=beta&t=hVPa2FbER38G4or7yTiDjHSvFRKDtS2gWs2-huwZh_M
+"You uploaded a feed photo on August 22, 2025 at 4:17 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQFVkeJ8iB81mQ/feedshare-shrink_480/B56ZjSkbaeG4AY-/0/1755879422445?e=1774483200&v=beta&t=NF8RIk1KE_qAXOzxrtUDPVYtbQzvNuuSBlBiIw8-Zi0
+"You uploaded a feed photo on August 22, 2025 at 4:17 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQH33l9E3Ysezg/feedshare-shrink_800/B56ZjSkbaTG0Ag-/0/1755879422550?e=1774483200&v=beta&t=izmMUKoa61v-yder2HPG4vtCK1mIpmYMj-PAmwIlypc
+"You uploaded a feed photo on August 22, 2025 at 4:17 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQHRIgcD3Ku76Q/feedshare-shrink_160/B56ZjSkbZiHQAc-/0/1755879422485?e=1774483200&v=beta&t=rIaCM-A6rkorPUFUnLs2DawQylpAas_t2MaF0ZWb5uM
+"You uploaded a video on August 11, 2025 at 11:56 PM (GMT)", -,https://dms.licdn.com/playlist/vid/dynamic/D5605AQE-BvO1BCXtlg/BAQksI1BtM?e=1773691200&v=beta&t=ZoC4QrTK6MPfEp2WoI70yORQYyv7SUWXUmA0DrasDuI
+"You uploaded a profile background photo on August 6, 2025 at 7:57 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5616AQH5Ow894umg5g/profile-displaybackgroundimage-shrink_200_800/B56ZiA9e3THMAU-/0/1754510259525?e=1774483200&v=beta&t=FBLLA_V0N93lnMmreiqKG0H6OMtgC3yXivoPOwp4A24
+"You uploaded a profile background photo on August 6, 2025 at 7:57 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5604AQHRuL4VfObqpA/profile-background-servable-original-image/B56ZiA9e2AHMAQ-/0/1754510258350?e=1774483200&v=beta&t=lxM1ldmjmnvwXiP8zuD-cNWUmctialGQHRtgyQWY1qA
+"You uploaded a feed photo on August 5, 2025 at 1:08 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQErooP-f15yCg/feedshare-shrink_160/B56Zh3xkYDH0Ac-/0/1754356139789?e=1774483200&v=beta&t=Zo28Z1Skx61L_vSak9ETbdnBY6nk8fbHJk36sF47hLM
+"You uploaded a feed photo on August 5, 2025 at 12:37 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQEGHCYAduVreA/feedshare-shrink_480/B56Zh3qZ1XHkAY-/0/1754354261595?e=1774483200&v=beta&t=HrScxLN-lxws9eaeG9YU0jWTU67-xN8knKhvsYRliVA
+"You uploaded a feed photo on August 4, 2025 at 9:53 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQGKGEFy0ENx_w/feedshare-shrink_2048_1536/B56Zh3E3NmHUAo-/0/1754344420549?e=1774483200&v=beta&t=8OBIvPgi7VzqZmuaHA0_022stJhDPl1P51HWKWunVjA
+"You uploaded a feed photo on July 27, 2025 at 4:07 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQFUtng0hPHlIA/feedshare-shrink_2048_1536/B56ZhKEN02HMAo-/0/1753589276243?e=1774483200&v=beta&t=9uEWlgd_e4WwrbOawyVK6Dvckk1X_PGSvIheIzjaxQA
+"You uploaded a feed photo on July 27, 2025 at 4:04 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQFuEISgV9TDUw/feedshare-shrink_2048_1536/B56ZhKDeLjG0Ao-/0/1753589081095?e=1774483200&v=beta&t=gY09wGHHNu3fvxFOxntcwe1CMbP7LC6Ch1clm_BtA50
+"You uploaded a feed photo on July 27, 2025 at 3:25 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQEP7-CPktL2lw/feedshare-shrink_2048_1536/B56ZhJ6hZrHcAs-/0/1753586734970?e=1774483200&v=beta&t=BDc0S_4eQoUd4BzwGjRdHkN-rSWmIlBial8whlhDh6A
+"You uploaded a feed photo on July 24, 2025 at 6:21 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D4E22AQEJh9c37LZqJg/feedshare-shrink_800/B4EZg9qtMJGwA0-/0/1753381262350?e=1774483200&v=beta&t=ewRdVx-QCZrJ9jDxBPR6-f9rMWkdQA_DW8de-zjGXnI
+"You uploaded a feed photo on July 20, 2025 at 4:08 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQGQYItaXvMHWw/feedshare-shrink_2048_1536/B56ZgmBHpDHUAs-/0/1752984484705?e=1774483200&v=beta&t=Y-k1c6zkK4csP5aLu0zChuXxrFDirhVpvuH82sTWrWQ
+"You uploaded a feed photo on July 20, 2025 at 3:54 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQGzBhrroWY0rw/feedshare-shrink_160/B56Zgl963JH0Ac-/0/1752983645898?e=1774483200&v=beta&t=SbGwX_AikfTQjMYLNqkrnCkud6CaxJAaX5HpKPAUi7o
+"You uploaded a feed photo on July 19, 2025 at 11:17 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQHEo_ejRertIw/feedshare-shrink_1280/B56Zgk.r78G4Ao-/0/1752967069679?e=1774483200&v=beta&t=ShG2m4tkPjfR7Pq_qkd-88Xvmy_0vU5KnXDQSsn24o0
+"You uploaded a feed photo on July 19, 2025 at 10:34 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQFWEV-deiknig/feedshare-shrink_20/B56Zgk0w7KH0A8-/0/1752964468679?e=1774483200&v=beta&t=t0Ng9EvDQ6lojL4bA4aJZi92Ia5yW4moOxy0KoCUjAE
+"You uploaded a photo on July 19, 2025 at 7:56 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D562DAQHTQG-H6sRe6w/profile-treasury-image-shrink_800_800/B56ZgkQoz6G4AY-/0/1752954999228?e=1773691200&v=beta&t=y_lv1lKcT_H_sBkVCV2oiZqHi7JNtwomEq8PbMvDtrw
+"You uploaded a photo on July 19, 2025 at 7:55 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D562DAQHFREkmgSWwaw/profile-treasury-image-shrink_1280_1280/B56ZgkQYA.HMAQ-/0/1752954930014?e=1773691200&v=beta&t=f7ry55s56s7c_ARkaAytv7ynYWVscv9kHPQNk8_rWT8
+"You uploaded a feed photo on July 18, 2025 at 9:40 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQFAutB9KPk4xA/feedshare-shrink_480/B56ZgfeyZLHMBY-/0/1752874821434?e=1774483200&v=beta&t=Eqtqr-nhwwdslzHOik8pPpvkToBq7xXBgWFxO_gbMCI
+"You uploaded a feed photo on July 18, 2025 at 9:22 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQEiOI7-TfkNKw/feedshare-shrink_160/B56ZgfauMpIAAc-/0/1752873755692?e=1774483200&v=beta&t=J2QIdcuJ-Hd-tVn8GII-Da-k5dgcy5NBZn2McKm8eTk
+"You uploaded a feed photo on July 18, 2025 at 9:10 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQHpiRNOZESJUg/feedshare-shrink_20/B56ZgfX3wsG4A4-/0/1752873008431?e=1774483200&v=beta&t=TnQ8srNT1ZPBg5HGFxhKslc1QBdQCMk0Lz4pWk0bFjQ
+"You uploaded a feed photo on July 18, 2025 at 8:24 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQFZmqU-uMAj-g/feedshare-shrink_480/B56ZgfNYG3HMAc-/0/1752870257336?e=1774483200&v=beta&t=3aUe9ZkGwp4BE3cP22qisaMvIiGqs6apIujKQgw_4f0
+"You uploaded a feed photo on July 18, 2025 at 8:24 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQF-ZwyHKBF_7A/feedshare-shrink_160/B56ZgfNVTZHcAc-/0/1752870245836?e=1774483200&v=beta&t=7Z95pFkSaDRzg37jUucfLHEThC39Qp_cSuiAixBuXI4
+"You uploaded a feed photo on July 17, 2025 at 10:51 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQHYd5Lr8wiHDA/feedshare-shrink_160/B56ZgalgMfH0Ac-/0/1752792695910?e=1774483200&v=beta&t=m5n4eCOQJ3t52rRZnRdACOsHfYIbkugxQBNlpvVDaUo
+"You uploaded a feed photo on July 17, 2025 at 10:11 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQEtTjfOCC-9-w/feedshare-shrink_800/B56ZgacbOhHMAk-/0/1752790316207?e=1774483200&v=beta&t=9-cHAQaZlOX7GGfWtfOX8rPDa23dr6zDAK9ocXQUwGE
+"You uploaded a feed photo on July 17, 2025 at 8:03 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQGcJb0bbM_HJQ/feedshare-shrink_800/B56ZgZ_G1yHUAo-/0/1752782630492?e=1774483200&v=beta&t=ruuvOESzdAN6W0as3srl4Ihyrkmc-cyMZ5CsvH0P-yA
+"You uploaded a feed photo on July 16, 2025 at 7:30 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQE66KPtDU7RwA/feedshare-shrink_1280/B56ZgUt2DLHMAs-/0/1752694219251?e=1774483200&v=beta&t=--WH_qL3kcq09K_zSIdDtQSq-SQ1Ub3Kp4MS7hP5Yhg
+"You uploaded a feed photo on July 15, 2025 at 7:00 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQEphxQMvWH7JQ/feedshare-shrink_2048_1536/B56ZgPdZUmGUAo-/0/1752606021228?e=1774483200&v=beta&t=sf7a1Aw7lvuK9iizGXfOzT45aC-eMlPu_wPj1cIVCPw
+"You uploaded a feed photo on July 14, 2025 at 8:38 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQGWYv5QZG9O7A/feedshare-shrink_160/B56ZgKqUtoHcAc-/0/1752525524044?e=1774483200&v=beta&t=mNwBIhoVw1NFgO1dm0YJykbzzkC8d4ZD3nsSVs1_wkA
+"You uploaded a feed photo on July 11, 2025 at 5:33 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQHQhEIpmJ7GUQ/feedshare-shrink_480/B56Zf3.RzfHYAc-/0/1752211987896?e=1774483200&v=beta&t=ymci0CgCixsWj_T2-k6D41BQeUv_d08SME23ZQTSPdc
+"You uploaded a feed photo on July 10, 2025 at 7:17 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQF3Xyc0GxSJcw/feedshare-shrink_160/B56ZfzMl0RHcAc-/0/1752131853817?e=1774483200&v=beta&t=2uThJ4CknJf1QbVQg2HsrESblYjuAYihoZoGLCo9iHg
+"You uploaded a feed photo on July 10, 2025 at 4:19 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQGDAe-yTDwG3w/feedshare-shrink_1280/B56Zfyju94G0Ao-/0/1752121143392?e=1774483200&v=beta&t=YL0MwooRswB5yC-lb4Fwv_1o6lNYEZsWjaQXXxUvEtw
+"You uploaded a feed photo on July 8, 2025 at 5:35 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQEMrL_fyAwVeQ/feedshare-shrink_800/B56Zfoh.9fGoAk-/0/1751952912453?e=1774483200&v=beta&t=G9BARxqxqA4roQzA3BSKSqhq5z-kx90-rb3b0c555Wk
+"You uploaded a feed photo on July 8, 2025 at 4:09 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQEg0uKo9NmUZg/feedshare-shrink_160/B56ZfoOYySH8Ac-/0/1751947775375?e=1774483200&v=beta&t=h_Nli8C7PCS9HueAdZwmsqdqHaWuj3YhzeA-lXSFfio
+"You uploaded a feed photo on July 8, 2025 at 3:44 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQGEqq1Qg8Yoiw/feedshare-shrink_1280/B56ZfoIrqhHQAk-/0/1751946279845?e=1774483200&v=beta&t=XBVntjNSL2LN2fHMIB55OyukMWFSlf0Jn8daeD3QURs
+"You uploaded a feed photo on July 8, 2025 at 3:44 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQGAi0rYymCx0A/feedshare-shrink_160/B56ZfoIkU1HQAc-/0/1751946249756?e=1774483200&v=beta&t=F3m9PlDwSXAF1Co_c7L1D1YMFze7s1QmAzBrXB9yaL0
+"You uploaded a feed photo on July 7, 2025 at 3:52 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQGeWpbrXg8BRg/feedshare-shrink_2048_1536/B56ZfllnKoGoAo-/0/1751903532073?e=1774483200&v=beta&t=DJw5DL991y6Gj7JFVZzeHjk_j7rtrSHLNw6_nsZPTTY
+"You uploaded a feed photo on July 6, 2025 at 10:04 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQEuZDZSlU3RjQ/feedshare-shrink_160/B56ZfhxM3qHQAc-/0/1751839461063?e=1774483200&v=beta&t=9sxKQ8Db1xrNucu1W9NY3rz5hhtQQZPw9AvCwP7GWDc
+"You uploaded a feed photo on July 6, 2025 at 12:23 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQElKlHfnVxqMQ/feedshare-shrink_160/B56ZfdHW7nHEAk-/0/1751761383378?e=1774483200&v=beta&t=HqrAbsric7NPzsDosqnlnPd61GNWD0LdyM_2cdEaFAY
+"You uploaded a feed photo on July 5, 2025 at 11:56 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQHROOCj9mF-gw/feedshare-shrink_800/B56ZfdBRdtGoAk-/0/1751759788152?e=1774483200&v=beta&t=jnu3269UR278dxXb1z-kP27ZBDbf4dlzdbQSz3O4KMo
+"You uploaded a feed photo on July 5, 2025 at 10:31 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQES_yDmDIsa5Q/feedshare-shrink_1280/B56Zfct7hkHUAo-/0/1751754717533?e=1774483200&v=beta&t=2RiX-J3yLzY4IdmHAuXxspPwIK4oTJuje2kZ2mGuOco
+"You uploaded a feed photo on July 5, 2025 at 9:14 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQE0bNiuccI0qQ/feedshare-shrink_480/B56ZfccQmUG0AY-/0/1751750085250?e=1774483200&v=beta&t=wKuoFZ5xm0prwvMvliVJsGGCoKun_CWopolKhnxI6OU
+"You uploaded a feed photo on July 3, 2025 at 3:37 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQGJbpOBKibUeg/feedshare-shrink_20/B56ZfQ712oHoA4-/0/1751557037749?e=1774483200&v=beta&t=4PCqEFhSoHz4iBanImJTrm2SSvysRCUvHUObFe11hmY
+"You uploaded a feed photo on July 3, 2025 at 3:10 PM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQFSgljF8ATmQw/feedshare-shrink_1280/B56ZfQ1qG3GoAo-/0/1751555416772?e=1774483200&v=beta&t=0SiTlRHyesLz6JJTuVLFVOCxJFQBfVZ1wH_Z2O2KjJA
+"You uploaded a feed photo on June 29, 2025 at 3:05 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D5622AQGPnnZiObo3NA/feedshare-shrink_20/B56Ze5pTfPGoA0-/0/1751166302444?e=1774483200&v=beta&t=vP97aWb6zGGnkW25hxs-DN9FZyeb9L3JmIVFT9mGqpQ
+"You uploaded a feed photo on September 5, 2024 at 8:38 AM (GMT)", -,https://media.licdn.com/dms/image/v2/D4E22AQHqSRczQDyEXQ/feedshare-shrink_2048_1536/feedshare-shrink_2048_1536/0/1725525485374?e=1774483200&v=beta&t=rRsPDrS1kxocary7k-r3XGWGHy_CwpZK8-HpYLFfid4

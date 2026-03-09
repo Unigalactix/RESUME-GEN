@@ -1,0 +1,58 @@
+[
+  {
+    "Company Name": "Microsoft",
+    "Title": "AI Software Engineer",
+    "Description": "",
+    "Location": "Redmond, WA",
+    "Started On": "Mar 2026",
+    "Finished On": ""
+  },
+  {
+    "Company Name": "Quadrant Technologies",
+    "Title": "AI Software Engineer",
+    "Description": "\u2022 Architected and deployed scalable AI solutions using Azure OpenAI and Azure Cognitive Services, enhancing threat intelligence analysis and automating data-driven mitigation strategies. \u2022 Implemented Document Intelligence workflows to extract and structure unstructured data, significantly reducing manual processing time and improving data reliability for downstream ML models. \u2022 Developed RAG (Retrieval-Augmented Generation) architectures by integrating Azure AI Search with LLMs, enabling rapid and accurate information retrieval for security vulnerability reports.",
+    "Location": "Redmond, WA",
+    "Started On": "Aug 2025",
+    "Finished On": ""
+  },
+  {
+    "Company Name": "Quadrant Technologies",
+    "Title": "Artificial Intelligence Intern",
+    "Description": "\u2022 Designed and implemented ETL processes for security logs and vulnerability reports, enhancing risk analysis capabilities. \u2022 Leveraged machine learning to analyze threat intelligence data, uncovering patterns for data-driven mitigation strategies. \u2022 Developed data ingestion systems for endpoint and network security, improving data reliability and integrity. \u2022 Created monitoring dashboards for cloud security, ensuring compliance and safeguarding sensitive information.",
+    "Location": "Redmond, WA",
+    "Started On": "Jul 2025",
+    "Finished On": "Aug 2025"
+  },
+  {
+    "Company Name": "QikCell by tickioT",
+    "Title": "Solutions Engineer",
+    "Description": "\u2022 Served as the primary technical liaison for client field trials, bridging hardware constraints (antennas/PCBs) with AI software requirements.  \u2022 Customized IoT product demonstrations using Python scripting to simulate client use cases, highlighting the value of AI-enhanced signal processing.  \u2022 Demonstrated AI-driven analytics capabilities, showcasing how edge data could be leveraged for predictive maintenance and operational efficiency.",
+    "Location": "Los Angeles, CA",
+    "Started On": "Jan 2025",
+    "Finished On": "May 2025"
+  },
+  {
+    "Company Name": "ColorOS",
+    "Title": "User Test",
+    "Description": "\u2022 Conducted user testing for ColorOS Beta and Alpha versions, ensuring software quality from 5.0 to 12.1.   \u2022 Identified and reported bugs, enhancing user experience and functionality.   \u2022 Suggested new features based on user feedback, contributing to product innovation.   \u2022 Collaborated with cross-functional teams to improve software performance and reliability.",
+    "Location": "India",
+    "Started On": "Jun 2018",
+    "Finished On": "Jul 2022"
+  },
+  {
+    "Company Name": "Pantech ProEd Pvt Ltd",
+    "Title": "Student Intern",
+    "Description": "\u2022 Contributed to the development of a high-speed 64-bit binary comparator, enhancing processing efficiency. \u2022 Collaborated with a team of engineers to troubleshoot and optimize design parameters, ensuring project milestones were met. \u2022 Demonstrated strong analytical skills and a commitment to learning, resulting in positive feedback from supervisors.",
+    "Location": "Hyderabad, Telangana, India",
+    "Started On": "Jun 2020",
+    "Finished On": "Jul 2020"
+  },
+  {
+    "Company Name": "PeopleLink Unified Communications Pvt. Ltd.",
+    "Title": "IoT Engineer in R&D",
+    "Description": "\u2022 Executed end-to-end testing of connected embedded devices, validating firmware stability, network connectivity, and sensor data integrity under varying bandwidth conditions. \u2022 Developed automated test scripts (using Python) to simulate real-world IoT usage scenarios, reducing manual testing time by 20%. \u2022 Analyzed communication protocols (e.g., TCP/IP, UDP) to troubleshoot latency issues in real-time data transmission, ensuring high-quality user experiences. \u2022 Collaborated with R&D teams to identify hardware-software interoperability bugs during the Alpha/Beta stages, resulting in a 20% reduction in post-launch defects.",
+    "Location": "Hyderabad, Telangana, India",
+    "Started On": "Jun 2018",
+    "Finished On": "May 2019"
+  }
+]

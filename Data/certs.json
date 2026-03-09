@@ -1,0 +1,116 @@
+[
+  {
+    "name": "Career Essentials in Sustainable Tech by Microsoft and LinkedIn",
+    "issuer": "Microsoft",
+    "date": "Sep 2024",
+    "url": "https://www.linkedin.com/learning/certificates/8cffc1495f17c8cf6755ef694dbbb36eaf4e5938ba345a904b43c30c3eee8426"
+  },
+  {
+    "name": "Microsoft Azure AI Essentials Professional Certificate by Microsoft and LinkedIn",
+    "issuer": "Microsoft",
+    "date": "Jul 2025",
+    "url": "https://www.linkedin.com/learning/certificates/0603cb1c8cfa79794168484c0ac326bbef4822627946588664137e99fef23cc2"
+  },
+  {
+    "name": "Career Essentials in GitHub Copilot Professional Certificate",
+    "issuer": "GitHub",
+    "date": "Jul 2025",
+    "url": "https://www.linkedin.com/learning/certificates/5a8a15af20393328a5516fd5e9f0fa74151c8474c213869f7a473e0b3a4d391e"
+  },
+  {
+    "name": "Docker Foundations Professional Certificate",
+    "issuer": "Docker",
+    "date": "Jul 2025",
+    "url": "https://www.linkedin.com/learning/certificates/14681be8ec4fbde458929c879ee596ae4176b5757a40e4800a74051e146a4d9e"
+  },
+  {
+    "name": "Apache Airflow 3 Fundamentals",
+    "issuer": "Astronomer",
+    "date": "Oct 2025",
+    "url": "#"
+  },
+  {
+    "name": "DAG Authoring for Apache Airflow 3",
+    "issuer": "Astronomer",
+    "date": "Oct 2025",
+    "url": "https://www.credly.com/badges/3a3f1c9c-1803-463e-b09a-7d9adecbbc27/public_url"
+  },
+  {
+    "name": "Microsoft Certified: Fabric Data Engineer Associate",
+    "issuer": "Microsoft",
+    "date": "Nov 2025",
+    "url": "https://learn.microsoft.com/api/credentials/share/en-us/RajeshKodaganti/358771CC34AED687?sharingId=3FB9837E0B42F855"
+  },
+  {
+    "name": "Microsoft Certified: Azure AI Engineer Associate",
+    "issuer": "Microsoft",
+    "date": "Dec 2025",
+    "url": "https://learn.microsoft.com/api/credentials/share/en-us/RajeshKodaganti/D302F40415BFB6F6?sharingId"
+  },
+  {
+    "name": "Microsoft Copilot for Productivity by Microsoft and LinkedIn",
+    "issuer": "Microsoft",
+    "date": "Dec 2025",
+    "url": "https://www.linkedin.com/learning/certificates/dbd2cd29908d0a0225fdca564e17c77b7e5718de33a4fb3232ce218d1eb0c10e"
+  },
+  {
+    "name": "Atlassian IT Service Management (ITSM) Professional Certificate",
+    "issuer": "Atlassian",
+    "date": "Dec 2025",
+    "url": "https://www.linkedin.com/learning/certificates/fe9caac6f726610fc4ea35fa4a6536e7df544a324451fe6fc4b87ea0091d3def"
+  },
+  {
+    "name": "Microsoft Certified: DevOps Engineer Expert",
+    "issuer": "Microsoft",
+    "date": "Jan 2026",
+    "url": "https://learn.microsoft.com/api/credentials/share/en-us/RajeshKodaganti/86AE7E208C191748?sharingId"
+  },
+  {
+    "name": "Microsoft Certified: Azure Administrator Associate",
+    "issuer": "Microsoft",
+    "date": "Jan 2026",
+    "url": "https://learn.microsoft.com/api/credentials/share/en-us/RajeshKodaganti/8A5CD6D9564647D8?sharingId"
+  },
+  {
+    "name": "Microsoft Certified: Azure Data Scientist Associate",
+    "issuer": "Microsoft",
+    "date": "Feb 2026",
+    "url": "https://learn.microsoft.com/api/credentials/share/en-us/RajeshKodaganti/888574E674DE4489?sharingId=3FB9837E0B42F855"
+  },
+  {
+    "name": "Claude Code in Action",
+    "issuer": "Anthropic",
+    "date": "Feb 2026",
+    "url": "https://verify.skilljar.com/c/s2s36yqgxyen"
+  },
+  {
+    "name": "Introduction to Model Context Protocol",
+    "issuer": "Anthropic",
+    "date": "Feb 2026",
+    "url": "https://verify.skilljar.com/c/w4mmfyrxw2qp"
+  },
+  {
+    "name": "Model Context Protocol: Advanced Topics",
+    "issuer": "Anthropic",
+    "date": "Feb 2026",
+    "url": "https://verify.skilljar.com/c/t9xzh8owvjdk"
+  },
+  {
+    "name": "Claude in Amazon Bedrock",
+    "issuer": "Anthropic",
+    "date": "Feb 2026",
+    "url": "https://verify.skilljar.com/c/93pxvjwggtyx"
+  },
+  {
+    "name": "Building with the Claude API",
+    "issuer": "Anthropic",
+    "date": "Feb 2026",
+    "url": "https://verify.skilljar.com/c/a69anyv5om9a"
+  },
+  {
+    "name": "Claude with Google Cloud's Vertex AI",
+    "issuer": "Anthropic",
+    "date": "Feb 2026",
+    "url": "https://verify.skilljar.com/c/yfgnxmut6gh2"
+  }
+]
