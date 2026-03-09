@@ -135,4 +135,4 @@ def generate_pdf(profile, top_skills, experience, education, projects):
             pdf.cell(0, 5, date_range, ln=True)
             pdf.ln(3)
 
-    return pdf.output(dest='S')
+    return bytes(pdf.output(dest='S'))
