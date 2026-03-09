@@ -1,6 +1,6 @@
 import streamlit as st
 from data_loader import load_all_data
-from matcher import match_skills, format_bullet_points, evaluate_relevance
+from matcher import match_skills, format_bullet_points, evaluate_relevance, generate_suggestions
 from markdown_generator import create_markdown_resume
 from pdf_generator import generate_pdf_from_markdown
 
@@ -37,8 +37,9 @@ if st.button("Generate Tailored Resume"):
             
             # 2. Filter, Format and sort experience bullets
             tailored_experience = []
-            for job in data['positions']:
-                if evaluate_relevance(job['description'], jd):
+            for i, job in enumerate(data['positions']):
+                # Always keep the first (most recent) job, filter the rest
+                if i == 0 or evaluate_relevance(job['description'], jd):
                     bullets = format_bullet_points(job['description'], jd)
                     # Keep top 4 most relevant bullets
                     job_copy = job.copy()
@@ -56,20 +57,29 @@ if st.button("Generate Tailored Resume"):
                     if proj_copy['bullets']:
                         tailored_projects.append(proj_copy)
 
-            # 4. Generate Initial Markdown
-            if 'resume_md' not in st.session_state:
-                st.session_state.resume_md = create_markdown_resume(
-                    data['profile'], 
-                    top_skills, 
-                    tailored_experience, 
-                    data['education'], 
-                    tailored_projects
-                )
+            # 4. Generate AI Suggestions based on Job Description
+            st.session_state.ai_suggestions = generate_suggestions(jd)
+
+            # 5. Generate Initial Markdown
+            st.session_state.resume_md = create_markdown_resume(
+                data['profile'], 
+                top_skills, 
+                tailored_experience, 
+                data['education'], 
+                tailored_projects
+            )
                 
             st.success("Analysis complete! Review and edit your resume below.")
 
 if 'resume_md' in st.session_state:
     st.subheader("2. Review & Edit Resume (Markdown)")
+    
+    if st.session_state.get('ai_suggestions'):
+        with st.expander("💡 AI Content Suggestions (Based on Role)", expanded=True):
+            st.info("Consider adding these keyword-rich bullet points into your experience section if they apply to you:")
+            for s in st.session_state.ai_suggestions:
+                st.write(f"- {s}")
+                
     st.info("You can edit the text below. The changes will be reflected in the final PDF.")
     
     # Editable text area for the markdown

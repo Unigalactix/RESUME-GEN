@@ -74,7 +74,10 @@ def evaluate_relevance(description, job_description):
     Candidate Experience:
     {description}
 
-    Is this candidate experience relevant enough to the Job Description to be included on a highly targeted 1-page resume? 
+    Is this candidate experience STRONGLY and DIRECTLY relevant to the Job Description? 
+    We are trying to fit this on a highly targeted, minimal 1-page resume. 
+    If it is only vaguely related or completely unrelated, reply 'NO'. 
+    If it provides strong evidence of required skills, reply 'YES'.
     Reply ONLY with 'YES' or 'NO'.
     """
     try:
@@ -128,3 +131,36 @@ def format_bullet_points(description, job_description=None):
         print(f"Error in format_bullet_points with Gemini: {e}")
         bullets = re.split(r'•|- |\n', description)
         return [b.strip() for b in bullets if b.strip()]
+
+def generate_suggestions(job_description):
+    """
+    Analyzes the Job Description and suggests 2-3 extra bullet points or keywords 
+    the user should manually add to their resume to heavily target the company/role.
+    """
+    if not job_description or not api_key:
+        return []
+        
+    prompt = f"""
+    Analyze the following Job Description:
+    {job_description}
+    
+    Based on the role and likely company needs inferred from this description, suggest 2 to 3 highly impactful, keyword-rich bullet points (or focus areas) the candidate should ensure are on their resume if they have the experience. 
+    Format them as actionable advice.
+    Return ONLY a JSON array of strings. Do not wrap in markdown quotes.
+    """
+    
+    try:
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        response = model.generate_content(prompt)
+        text = response.text.strip()
+        
+        if text.startswith('```json'):
+            text = text[7:-3].strip()
+        elif text.startswith('```'):
+            text = text[3:-3].strip()
+            
+        suggestions = json.loads(text)
+        return suggestions
+    except Exception as e:
+        print(f"Error generating suggestions: {e}")
+        return []
