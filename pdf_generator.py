@@ -18,121 +18,74 @@ import io
 
 class ResumePDF(FPDF):
     def header(self):
-        # We handle header manually in content to allow dynamic name
         pass
 
     def footer(self):
-        # Add page numbers
-        self.set_y(-15)
-        self.set_font("helvetica", "I", 8)
-        self.cell(0, 10, f"Page {self.page_no()}", align="C")
+        # Optional: Add page numbers, though minimal resumes often don't need them
+        pass
 
-    def chapter_title(self, label):
-        label = sanitize_text(label)
-        self.set_font("helvetica", "B", 14)
-        self.set_text_color(0, 51, 102) # Dark Blue
-        self.cell(0, 8, label, ln=True)
-        self.set_draw_color(0, 51, 102)
-        self.line(self.get_x(), self.get_y(), self.get_x() + 190, self.get_y())
-        self.ln(4)
-        self.set_text_color(0, 0, 0) # Back to black
-
-    def chapter_body(self, text):
-        text = sanitize_text(text)
-        self.set_font("helvetica", "", 11)
-        self.multi_cell(0, 5, text)
-        self.ln(2)
-
-def generate_pdf(profile, top_skills, experience, education, projects):
+def generate_pdf_from_markdown(markdown_text):
     """
-    Generates a PDF resume in memory and returns the byte data.
+    Parses an edited markdown string and generates a compact, minimal PDF.
     """
     pdf = ResumePDF()
+    pdf.set_auto_page_break(auto=True, margin=10)
     pdf.add_page()
     
-    # --- HEADER (Name and Contact Info) ---
-    pdf.set_font("helvetica", "B", 24)
-    name = sanitize_text(f"{profile.get('first_name', '')} {profile.get('last_name', '')}".strip())
-    pdf.cell(0, 10, name, ln=True, align='C')
+    # 1. Very tight margins
+    pdf.set_margins(left=12, top=12, right=12)
     
-    pdf.set_font("helvetica", "", 10)
-    contact_info = sanitize_text(profile.get("websites", ""))
-    if contact_info:
-        pdf.cell(0, 5, contact_info, ln=True, align='C')
-    pdf.ln(5)
-
-    # --- SUMMARY ---
-    summary = profile.get("summary", "")
-    if summary:
-        pdf.chapter_title("Professional Summary")
-        pdf.chapter_body(summary)
-        pdf.ln(2)
-
-    # --- SKILLS ---
-    if top_skills:
-        pdf.chapter_title("Top Skills")
-        pdf.set_font("helvetica", "", 11)
-        skills_str = sanitize_text(" | ".join(top_skills))
-        pdf.multi_cell(0, 5, skills_str)
-        pdf.ln(5)
-
-    # --- EXPERIENCE ---
-    if experience:
-        pdf.chapter_title("Professional Experience")
-        for job in experience:
+    lines = markdown_text.split('\n')
+    
+    for line in lines:
+        line_clean = sanitize_text(line.strip())
+        if not line_clean:
+            pdf.ln(1) # Very small gap for empty lines
+            continue
+            
+        if line_clean.startswith('# '):
+            # Main Header (Name)
+            pdf.set_font("helvetica", "B", 18)
+            pdf.set_text_color(0, 0, 0)
+            pdf.cell(0, 8, line_clean[2:], ln=True, align='C')
+            pdf.ln(1)
+            
+        elif line_clean.startswith('## '):
+            # Section Titles
+            pdf.ln(3) # Space before new section
             pdf.set_font("helvetica", "B", 12)
-            title_comp = sanitize_text(f"{job.get('title', '')} at {job.get('company', '')}")
-            pdf.cell(0, 6, title_comp, ln=True)
+            pdf.set_text_color(0, 51, 102) # Dark Blue
+            pdf.cell(0, 5, line_clean[3:], ln=True)
+            pdf.set_draw_color(0, 51, 102)
+            pdf.line(pdf.get_x(), pdf.get_y(), pdf.get_x() + 186, pdf.get_y())
+            pdf.ln(2)
+            pdf.set_text_color(0, 0, 0) # Reset to black
             
-            pdf.set_font("helvetica", "I", 10)
-            date_range = f"{job.get('start', '')} - {job.get('end', '')}"
-            location = job.get('location', '')
-            loc_date = sanitize_text(f"{location} | {date_range}" if location else date_range)
-            pdf.cell(0, 5, loc_date, ln=True)
+        elif line_clean.startswith('### '):
+            # Job Titles / Schools / Projects
+            text = line_clean[4:].replace('**', '') # Strip bold markdown syntax for PDF
+            pdf.set_font("helvetica", "B", 11)
+            pdf.cell(0, 5, text, ln=True)
             
-            pdf.set_font("helvetica", "", 11)
-            bullets = job.get('bullets', [])
-            for bullet in bullets:
-                bullet_clean = sanitize_text(bullet.lstrip("•- "))
-                pdf.set_x(15)
-                pdf.multi_cell(0, 5, f"- {bullet_clean}")
-            pdf.ln(3)
-
-    # --- PROJECTS ---
-    if projects:
-        pdf.chapter_title("Projects")
-        for proj in projects:
-            pdf.set_font("helvetica", "B", 12)
-            proj_title = sanitize_text(proj.get('title', ''))
-            pdf.cell(0, 6, proj_title, ln=True)
-            
-            pdf.set_font("helvetica", "I", 10)
-            date_range = sanitize_text(f"{proj.get('start', '')} - {proj.get('end', '')}")
-            pdf.cell(0, 5, date_range, ln=True)
-            
-            pdf.set_font("helvetica", "", 11)
-            bullets = proj.get('bullets', [])
-            for bullet in bullets:
-                bullet_clean = sanitize_text(bullet.lstrip("•- "))
-                pdf.set_x(15)
-                pdf.multi_cell(0, 5, f"- {bullet_clean}")
-            pdf.ln(3)
-
-    # --- EDUCATION ---
-    if education:
-        pdf.chapter_title("Education")
-        for edu in education:
-            pdf.set_font("helvetica", "B", 12)
-            school = sanitize_text(edu.get('school', ''))
-            pdf.cell(0, 6, school, ln=True)
-            
-            pdf.set_font("helvetica", "I", 11)
-            degree = sanitize_text(edu.get('degree', ''))
-            pdf.cell(0, 5, degree, ln=True)
-            
+        elif line_clean.startswith('- '):
+            # Bullet points
             pdf.set_font("helvetica", "", 10)
-            date_range = sanitize_text(f"{edu.get('start', '')} - {edu.get('end', '')}")
-            pdf.cell(0, 5, date_range, ln=True)
-            pdf.ln(3)
+            pdf.set_x(16) # Indent bullets
+            pdf.multi_cell(0, 4, f"- {line_clean[2:]}")
+            
+        elif line_clean.startswith('**Contact:**'):
+            pdf.set_font("helvetica", "", 10)
+            pdf.cell(0, 5, line_clean.replace('**', ''), ln=True, align='C')
+            pdf.ln(2)
+            
+        elif line_clean.startswith('*') and line_clean.endswith('*'):
+            # Italicized dates/locations
+            pdf.set_font("helvetica", "I", 10)
+            pdf.cell(0, 4, line_clean.replace('*', ''), ln=True)
+            
+        else:
+            # Regular body text (Summary, Skills, Degrees)
+            pdf.set_font("helvetica", "", 10)
+            pdf.multi_cell(0, 4, line_clean.replace('**', ''))
 
     return bytes(pdf.output(dest='S'))
