@@ -1,8 +1,31 @@
 import streamlit as st
+import requests
+from bs4 import BeautifulSoup
+import base64
 from data_loader import load_all_data
 from matcher import match_skills, format_bullet_points, evaluate_relevance, generate_suggestions
 from markdown_generator import create_markdown_resume
 from pdf_generator import generate_pdf_from_markdown
+
+def extract_text_from_url(url):
+    """Fetches and cleans visible text from a URL."""
+    try:
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.content, 'html.parser')
+        # Remove script and style elements
+        for script in soup(["script", "style"]):
+            script.extract()
+        return soup.get_text(separator=' ', strip=True)
+    except Exception as e:
+        return f"ERROR: {e}"
+
+def display_pdf(pdf_bytes):
+    """Embeds the PDF using an HTML iframe via base64 encoding."""
+    base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
+    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="800" type="application/pdf"></iframe>'
+    st.markdown(pdf_display, unsafe_allow_html=True)
 
 st.set_page_config(page_title="AI Resume Generator", page_icon="📄")
 
@@ -24,14 +47,24 @@ st.sidebar.write(f"**Experience Entries:** {len(data['positions'])}")
 st.sidebar.write(f"**Education Entries:** {len(data['education'])}")
 st.sidebar.write(f"**Project Entries:** {len(data['projects'])}")
 
-st.subheader("1. Enter Job Description")
-jd = st.text_area("Paste the Job Description here:", height=200)
+st.subheader("1. Enter Job Description or URL")
+jd_input = st.text_area("Paste the Job Description text OR a link to the job posting:", height=200)
 
 if st.button("Generate Tailored Resume"):
-    if not jd.strip():
-        st.warning("Please enter a job description.")
+    if not jd_input.strip():
+        st.warning("Please enter a job description or URL.")
     else:
-        with st.spinner("Analyzing job description and tailoring your resume..."):
+        with st.spinner("Processing input and tailoring your resume..."):
+            jd = jd_input.strip()
+            
+            # Scrape if user provided a URL
+            if jd.startswith("http://") or jd.startswith("https://"):
+                jd = extract_text_from_url(jd)
+                if jd.startswith("ERROR:"):
+                    st.error(f"Failed to extract text from URL: {jd}")
+                    st.stop()
+                st.info("Successfully extracted text from the provided URL.")
+                
             # 1. Match Skills
             top_skills = match_skills(data['skills'], jd, top_n=15)
             
@@ -89,20 +122,24 @@ if 'resume_md' in st.session_state:
     if edited_md != st.session_state.resume_md:
         st.session_state.resume_md = edited_md
 
-    st.subheader("3. Download PDF")
-    if st.button("Generate & Download PDF"):
+    st.subheader("3. View & Download PDF")
+    if st.button("Generate Final PDF"):
         try:
             with st.spinner("Generating minimal PDF..."):
                 pdf_bytes = generate_pdf_from_markdown(st.session_state.resume_md)
                 
+            st.success("PDF generated successfully!")
+            
             st.download_button(
                 label="Download Tailored Resume",
                 data=pdf_bytes,
                 file_name="Tailored_Resume.pdf",
                 mime="application/pdf",
-                # Use a different key so it doesn't clash with the generate button
                 key="download_btn" 
             )
-            st.success("PDF ready for download!")
+            
+            st.markdown("### PDF Preview")
+            display_pdf(pdf_bytes)
+            
         except Exception as e:
             st.error(f"Error generating PDF: {e}")
