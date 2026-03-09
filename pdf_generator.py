@@ -87,7 +87,8 @@ def generate_pdf_from_markdown(markdown_text):
             html_text = html_text.replace('rajeshkodaganti.work@gmail.com', f'<a href="mailto:rajeshkodaganti.work@gmail.com"><font color={blue_hex}>rajeshkodaganti.work@gmail.com</font></a>')
             html_text = html_text.replace('GitHub', f'<a href="https://github.com"><font color={blue_hex}>GitHub</font></a>')
             html_text = html_text.replace('LinkedIN', f'<a href="https://linkedin.com"><font color={blue_hex}>LinkedIN</font></a>')
-            html_text = html_text.replace('Portfolio', f'<a href="#"><font color={blue_hex}>Portfolio</font></a>')
+            # FPDF2 treats urls starting with # as internal document links. We use a placeholder URL or just color it.
+            html_text = html_text.replace('Portfolio', f'<font color={blue_hex}>Portfolio</font>')
             
             pdf.write_html(html_text)
             pdf.ln(2)
