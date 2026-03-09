@@ -9,16 +9,13 @@ def create_markdown_resume(profile, top_skills, experience, education, projects)
     
     # 1. HEADER
     name = f"{profile.get('first_name', '')} {profile.get('last_name', '')}".strip()
+    if not name:
+        name = "Rajesh Kodaganti"
     md.append(f"# {name}")
     
-    contact_info = profile.get("websites", "")
-    if contact_info:
-        md.append(f"**Contact:** {contact_info}")
-    
-    # Clean location if available, else skip
-    location = extract_city_state(profile.get("location", "")) # Note: we might need to add location to profile dict in data_loader if it exists
-    if location:
-        md.append(f"**Location:** {location}")
+    # Exact format requested by user
+    contact_str = "+1 (747) 366 0793 • rajeshkodaganti.work@gmail.com • GitHub • LinkedIN • Portfolio • Redmond, USA"
+    md.append(f"**Contact:** {contact_str}")
         
     md.append("")
 

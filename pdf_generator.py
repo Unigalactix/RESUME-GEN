@@ -46,7 +46,7 @@ def generate_pdf_from_markdown(markdown_text):
         if line_clean.startswith('# '):
             # Main Header (Name)
             pdf.set_font("helvetica", "B", 18)
-            pdf.set_text_color(0, 0, 0)
+            pdf.set_text_color(31, 78, 121) # Dark Blue (matches typical template blue)
             pdf.cell(0, 8, line_clean[2:], ln=True, align='C')
             pdf.ln(1)
             
@@ -75,7 +75,21 @@ def generate_pdf_from_markdown(markdown_text):
             
         elif line_clean.startswith('**Contact:**'):
             pdf.set_font("helvetica", "", 10)
-            pdf.cell(0, 5, line_clean.replace('**', ''), ln=True, align='C')
+            contact_text = line_clean.replace('**Contact:**', '').strip()
+            # Restore the bullets if they were sanitized to hyphens, or just use middle dots
+            contact_text = contact_text.replace('-', '\xb7')
+            
+            # Use fpdf2 HTML rendering to color links securely without messing up centered alignment
+            html_text = f'''<p align="center"><font face="helvetica" size="10" color="#000000">{contact_text}</font></p>'''
+            
+            # Color specific known elements to blue
+            blue_hex = '"#1f4e79"'
+            html_text = html_text.replace('rajeshkodaganti.work@gmail.com', f'<a href="mailto:rajeshkodaganti.work@gmail.com"><font color={blue_hex}>rajeshkodaganti.work@gmail.com</font></a>')
+            html_text = html_text.replace('GitHub', f'<a href="https://github.com"><font color={blue_hex}>GitHub</font></a>')
+            html_text = html_text.replace('LinkedIN', f'<a href="https://linkedin.com"><font color={blue_hex}>LinkedIN</font></a>')
+            html_text = html_text.replace('Portfolio', f'<a href="#"><font color={blue_hex}>Portfolio</font></a>')
+            
+            pdf.write_html(html_text)
             pdf.ln(2)
             
         elif line_clean.startswith('*') and line_clean.endswith('*'):
