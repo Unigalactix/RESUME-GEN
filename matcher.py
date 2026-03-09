@@ -3,6 +3,8 @@ import os
 from dotenv import load_dotenv
 import json
 import re
+import requests
+from bs4 import BeautifulSoup
 from resume_formatter import ATS_SYSTEM_INSTRUCTION
 
 load_dotenv()
@@ -11,6 +13,20 @@ load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 if api_key:
     genai.configure(api_key=api_key)
+
+def extract_text_from_url(url):
+    """Fetches and cleans visible text from a URL."""
+    try:
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.content, 'html.parser')
+        # Remove script and style elements
+        for script in soup(["script", "style"]):
+            script.extract()
+        return soup.get_text(separator=' ', strip=True)
+    except Exception as e:
+        return f"ERROR: {e}"
 
 def clean_text(text):
     if not isinstance(text, str):

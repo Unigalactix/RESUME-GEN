@@ -1,24 +1,9 @@
 import streamlit as st
-import requests
-from bs4 import BeautifulSoup
 import base64
 from data_loader import load_all_data
-from matcher import match_skills, format_bullet_points, evaluate_relevance, generate_suggestions
+from matcher import match_skills, format_bullet_points, evaluate_relevance, generate_suggestions, extract_text_from_url
 from markdown_generator import create_markdown_resume
 from pdf_generator import generate_pdf_from_markdown
-
-def extract_text_from_url(url):
-    """Fetches and cleans visible text from a URL."""
-    try:
-        headers = {'User-Agent': 'Mozilla/5.0'}
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.content, 'html.parser')
-        for script in soup(["script", "style"]):
-            script.extract()
-        return soup.get_text(separator=' ', strip=True)
-    except Exception as e:
-        return f"ERROR: {e}"
 
 def display_pdf(pdf_bytes):
     """Embeds the PDF using an HTML iframe via base64 encoding."""
