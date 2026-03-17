@@ -14,7 +14,6 @@ def sanitize_text(text):
     for k, v in replacements.items():
         text = text.replace(k, v)
     return text.encode('latin-1', 'ignore').decode('latin-1')
-import io
 
 class ResumePDF(FPDF):
     def header(self):
@@ -76,21 +75,8 @@ def generate_pdf_from_markdown(markdown_text):
         elif line_clean.startswith('**Contact:**'):
             pdf.set_font("helvetica", "", 10)
             contact_text = line_clean.replace('**Contact:**', '').strip()
-            # Restore the bullets if they were sanitized to hyphens, or just use middle dots
             contact_text = contact_text.replace('-', '\xb7')
-            
-            # Use fpdf2 HTML rendering to color links securely without messing up centered alignment
-            html_text = f'''<p align="center"><font face="helvetica" size="10" color="#000000">{contact_text}</font></p>'''
-            
-            # Color specific known elements to blue
-            blue_hex = '"#1f4e79"'
-            html_text = html_text.replace('rajeshkodaganti.work@gmail.com', f'<a href="mailto:rajeshkodaganti.work@gmail.com"><font color={blue_hex}>rajeshkodaganti.work@gmail.com</font></a>')
-            html_text = html_text.replace('GitHub', f'<a href="https://github.com"><font color={blue_hex}>GitHub</font></a>')
-            html_text = html_text.replace('LinkedIN', f'<a href="https://linkedin.com"><font color={blue_hex}>LinkedIN</font></a>')
-            # FPDF2 treats urls starting with # as internal document links. We use a placeholder URL or just color it.
-            html_text = html_text.replace('Portfolio', f'<font color={blue_hex}>Portfolio</font>')
-            
-            pdf.write_html(html_text)
+            pdf.multi_cell(0, 5, contact_text, align='C')
             pdf.ln(2)
             
         elif line_clean.startswith('*') and line_clean.endswith('*'):

@@ -14,6 +14,40 @@ Strictly adhere to the following rules:
 7. Relevance: Omit entirely any bullet points or details that are completely irrelevant to the target Job Description.
 """
 
+DEFAULT_SECTION_ORDER = [
+    "Header",
+    "Summary",
+    "Skills",
+    "Experience",
+    "Projects",
+    "Certifications",
+    "Publications",
+    "Volunteering",
+    "Languages",
+    "Education",
+]
+
+RESUME_VARIANTS = {
+    "ATS-safe": {
+        "section_order": ["Summary", "Skills", "Experience", "Projects", "Certifications", "Education"],
+        "include_summary": False,
+        "max_experience_bullets": 4,
+        "max_project_bullets": 3,
+    },
+    "Recruiter-friendly": {
+        "section_order": ["Summary", "Experience", "Skills", "Projects", "Certifications", "Education", "Languages"],
+        "include_summary": True,
+        "max_experience_bullets": 3,
+        "max_project_bullets": 2,
+    },
+    "New Grad Focus": {
+        "section_order": ["Summary", "Skills", "Projects", "Experience", "Education", "Certifications", "Languages"],
+        "include_summary": True,
+        "max_experience_bullets": 3,
+        "max_project_bullets": 4,
+    },
+}
+
 def extract_city_state(location_string):
     """
     Cleans up a location string to ensure it's just City, State.
@@ -34,4 +68,41 @@ def get_section_order():
     """
     Returns the strict order of sections for an ATS-friendly technical resume.
     """
-    return ["Header", "Skills", "Experience", "Projects", "Education"]
+    return DEFAULT_SECTION_ORDER
+
+
+def get_resume_variant_names():
+    return list(RESUME_VARIANTS.keys())
+
+
+def get_resume_variant_config(variant_name):
+    return RESUME_VARIANTS.get(variant_name, RESUME_VARIANTS["ATS-safe"]).copy()
+
+
+def get_effective_section_order(selected_sections=None, variant_name="ATS-safe"):
+    configured_order = get_resume_variant_config(variant_name).get("section_order", [])
+    ordered_sections = selected_sections or configured_order
+    return ["Header"] + [section for section in ordered_sections if section != "Header"]
+
+
+def build_contact_line(profile):
+    parts = []
+    if profile.get("phone"):
+        parts.append(profile["phone"])
+    if profile.get("email"):
+        parts.append(profile["email"])
+    for website in profile.get("website_links", [])[:3]:
+        label = website.get("label") or website.get("url")
+        if label:
+            parts.append(label)
+    if profile.get("location"):
+        parts.append(profile["location"])
+
+    seen = set()
+    unique_parts = []
+    for part in parts:
+        normalized = part.strip().lower()
+        if normalized and normalized not in seen:
+            unique_parts.append(part.strip())
+            seen.add(normalized)
+    return " • ".join(unique_parts)

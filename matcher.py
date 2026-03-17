@@ -1,18 +1,9 @@
-import google.generativeai as genai
-import os
-from dotenv import load_dotenv
 import json
 import re
 import requests
 from bs4 import BeautifulSoup
+from ai_helper import generate_json, generate_text, is_ai_configured
 from resume_formatter import ATS_SYSTEM_INSTRUCTION
-
-load_dotenv()
-
-# Configure Google Gemini API
-api_key = os.getenv("GEMINI_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
 
 def extract_text_from_url(url):
     """Fetches and cleans visible text from a URL."""
@@ -37,7 +28,7 @@ def match_skills(skills, job_description, top_n=15):
     """
     Uses Gemini to identify which of the user's skills are most relevant to the JD.
     """
-    if not skills or not job_description or not api_key:
+    if not skills or not job_description or not is_ai_configured():
         return skills[:top_n]
     
     prompt = f"""
@@ -52,17 +43,9 @@ def match_skills(skills, job_description, top_n=15):
     """
     
     try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
-        response = model.generate_content(prompt)
-        text = response.text.strip()
-        
-        # Clean up possible markdown wrappers
-        if text.startswith('```json'):
-            text = text[7:-3].strip()
-        elif text.startswith('```'):
-            text = text[3:-3].strip()
-        
-        selected_skills = json.loads(text)
+        selected_skills = generate_json(prompt, fallback=skills[:top_n])
+        if not isinstance(selected_skills, list):
+            return skills[:top_n]
         
         # Merge picked skills with any missed ones to hit top_n if needed
         valid_skills = [s for s in selected_skills if s in skills]
@@ -80,7 +63,7 @@ def evaluate_relevance(description, job_description):
     Evaluates if a given job/project description is actually relevant to the JD.
     Returns True if relevant enough to include, False otherwise.
     """
-    if not description or not job_description or not api_key:
+    if not description or not job_description or not is_ai_configured():
         return True # Default to keep if no JD or API key
 
     prompt = f"""
@@ -97,9 +80,7 @@ def evaluate_relevance(description, job_description):
     Reply ONLY with 'YES' or 'NO'.
     """
     try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
-        response = model.generate_content(prompt)
-        text = response.text.strip().upper()
+        text = generate_text(prompt).upper()
         return 'YES' in text
     except Exception as e:
         print(f"Error evaluating relevance: {e}")
@@ -114,7 +95,7 @@ def format_bullet_points(description, job_description=None):
     if not description:
         return []
     
-    if not job_description or not api_key:
+    if not job_description or not is_ai_configured():
         bullets = re.split(r'•|- |\n', description)
         return [b.strip() for b in bullets if b.strip()]
 
@@ -132,16 +113,9 @@ def format_bullet_points(description, job_description=None):
     """
     
     try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
-        response = model.generate_content(prompt)
-        text = response.text.strip()
-        
-        if text.startswith('```json'):
-            text = text[7:-3].strip()
-        elif text.startswith('```'):
-            text = text[3:-3].strip()
-            
-        bullets = json.loads(text)
+        bullets = generate_json(prompt, fallback=[])
+        if not isinstance(bullets, list):
+            bullets = []
         return bullets
     except Exception as e:
         print(f"Error in format_bullet_points with Gemini: {e}")
@@ -153,7 +127,7 @@ def generate_suggestions(job_description):
     Analyzes the Job Description and suggests 2-3 extra bullet points or keywords 
     the user should manually add to their resume to heavily target the company/role.
     """
-    if not job_description or not api_key:
+    if not job_description or not is_ai_configured():
         return []
         
     prompt = f"""
@@ -166,16 +140,9 @@ def generate_suggestions(job_description):
     """
     
     try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
-        response = model.generate_content(prompt)
-        text = response.text.strip()
-        
-        if text.startswith('```json'):
-            text = text[7:-3].strip()
-        elif text.startswith('```'):
-            text = text[3:-3].strip()
-            
-        suggestions = json.loads(text)
+        suggestions = generate_json(prompt, fallback=[])
+        if not isinstance(suggestions, list):
+            suggestions = []
         return suggestions
     except Exception as e:
         print(f"Error generating suggestions: {e}")

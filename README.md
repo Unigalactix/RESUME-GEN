@@ -8,9 +8,9 @@ An AI-powered career optimization tool built with **Streamlit** and **Google Gem
 
 | Tool | Description |
 |---|---|
-| 📄 **AI Resume Generator** | Tailors your resume to a specific job description using your LinkedIn data. Outputs an editable Markdown resume and a downloadable PDF. |
-| 📊 **Resume Score** | Analyzes how well your existing PDF resume matches a job description. Returns a 0–100 score, key strengths/weaknesses, and actionable suggestions. |
-| 🔍 **Job Finder** | Identifies top hiring companies for your target role and generates Google Dork search links to find open roles directly on company ATS portals (Lever, Greenhouse, Workday, iCIMS). |
+| 📄 **AI Resume Generator** | Tailors your resume to a job description using LinkedIn export data, supports section toggles and resume variants, and outputs editable Markdown plus a downloadable PDF. |
+| 📊 **Resume Score** | Analyzes how well your existing PDF resume matches a job description and now returns a score breakdown, gap map, rewrite priorities, and suggested replacement bullets. |
+| 🔍 **Job Finder** | Identifies top hiring companies for your target role, adds structured filters for work authorization and job preferences, and generates Google Dork plus ATS-specific search links for company job boards. |
 
 ---
 
@@ -90,6 +90,8 @@ The application will open at **http://localhost:8501**.
 |---|---|
 | `GEMINI_API_KEY` | Your Google Gemini API key (required) |
 
+When the API key is missing, the app now surfaces a visible warning and AI-assisted features fall back to limited behavior where possible.
+
 ### LinkedIn Data Export Guide
 
 1. Go to **LinkedIn > Settings & Privacy > Data Privacy > Get a copy of your data**
@@ -106,10 +108,11 @@ The application will open at **http://localhost:8501**.
 
 1. Navigate to **AI Resume Generator** from the sidebar
 2. Paste a job description or enter a job posting URL
-3. Click **Generate Resume**
-4. Review the generated Markdown resume and AI keyword suggestions
-5. Edit the Markdown in-app if needed
-6. Click **Download PDF** to save your tailored resume
+3. Choose a **resume variant** and pick the sections you want to include
+4. Click **Generate Tailored Resume**
+5. Review the generated Markdown resume, profile completeness insights, and AI keyword suggestions
+6. Edit the Markdown in-app if needed
+7. Click **Generate Final PDF** to save your tailored resume
 
 ### Resume Score
 
@@ -117,15 +120,25 @@ The application will open at **http://localhost:8501**.
 2. Upload your existing resume as a **PDF**
 3. Paste a job description or enter a job posting URL
 4. Click **Score Resume**
-5. Review your score (🟢 ≥80 · 🟡 ≥60 · 🔴 <60), strengths, weaknesses, and suggestions
+5. Review your score (🟢 ≥80 · 🟡 ≥60 · 🔴 <60), category breakdown, gap analysis, rewrite priorities, and tailored bullets
 
 ### Job Finder
 
 1. Navigate to **Find Jobs** from the sidebar
-2. Enter your **target role** (e.g., `Senior Software Engineer`)
-3. Optionally add a **location** (e.g., `San Francisco, CA`)
-4. Click **Find Jobs**
-5. Browse the list of target companies and click the generated **Google search links** to find open roles directly on their ATS portals
+2. Choose a common role from the dropdown or enter your own custom role
+3. Add filters such as **location**, **experience level**, **job mode**, and **industry focus**
+4. If relevant, select a **work authorization focus** like `F-1 OPT friendly` or `H-1B sponsorship required`
+5. Optionally start from a preset such as `F-1 OPT New Grad` or `H-1B Transfer`
+6. Click **Generate Targets & Queries**
+7. Browse the target companies, review the sponsorship signal, and open the generated **Google** or **ATS-specific** search links to find roles directly on company portals
+
+### App Validation
+
+The sidebar now shows whether:
+
+1. Gemini is configured correctly
+2. Your required LinkedIn export files are present
+3. The app is running in fallback mode because of missing configuration
 
 ---
 
