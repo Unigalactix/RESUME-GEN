@@ -60,7 +60,13 @@ pip install -r requirements.txt
 
 ### 4. Configure Your API Key
 
-Create a `.env` file in the project root:
+Copy the environment template and update it:
+
+```bash
+cp .env.example .env
+```
+
+Then set your API key in `.env`:
 
 ```bash
 GEMINI_API_KEY=your_gemini_api_key_here

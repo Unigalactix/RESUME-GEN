@@ -139,9 +139,17 @@ def create_markdown_resume(
             md.append("## Education")
             for edu in education:
                 md.append(f"### **{edu.get('school', '')}**")
-                md.append(f"{edu.get('degree', '')}")
-                date_range = f"*{edu.get('start', '')} - {edu.get('end', '')}*"
-                md.append(date_range)
+                degree = edu.get('degree', '').strip()
+                start = edu.get('start', '').strip()
+                end = edu.get('end', '').strip()
+                date_range = " - ".join(part for part in [start, end] if part)
+
+                if degree and date_range:
+                    md.append(f"{degree} | {date_range}")
+                elif degree:
+                    md.append(degree)
+                elif date_range:
+                    md.append(date_range)
                 md.append("")
 
     return "\n".join(md)

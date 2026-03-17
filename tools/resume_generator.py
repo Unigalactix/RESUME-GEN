@@ -1,16 +1,26 @@
 import streamlit as st
-import base64
 from data_loader import build_profile_completeness_report, load_all_data
 from matcher import match_skills, format_bullet_points, evaluate_relevance, generate_suggestions, extract_text_from_url
 from markdown_generator import create_markdown_resume
 from pdf_generator import generate_pdf_from_markdown
 from resume_formatter import get_resume_variant_config, get_resume_variant_names, get_section_order
+from pdf2image import convert_from_bytes
 
-def display_pdf(pdf_bytes):
-    """Embeds the PDF using an HTML iframe via base64 encoding."""
-    base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
-    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="800" type="application/pdf"></iframe>'
-    st.markdown(pdf_display, unsafe_allow_html=True)
+def display_pdf_preview(pdf_bytes):
+    """Converts PDF bytes to an image preview so browsers cannot block embedded PDF rendering."""
+    try:
+        images = convert_from_bytes(pdf_bytes, dpi=180, first_page=1, last_page=1, fmt="png")
+        if not images:
+            st.warning("Unable to render PDF preview image.")
+            return
+
+        st.image(images[0], caption="PDF Preview (Page 1)", use_container_width=True)
+    except Exception as err:
+        st.warning(
+            "Preview image could not be generated in this environment. "
+            "You can still download the PDF normally. "
+            f"Details: {err}"
+        )
 
 @st.cache_data
 def get_data():
@@ -172,7 +182,7 @@ def render_resume_generator():
                 )
                 
                 st.markdown("### PDF Preview")
-                display_pdf(pdf_bytes)
+                display_pdf_preview(pdf_bytes)
                 
             except Exception as e:
                 st.error(f"Error generating PDF: {e}")
