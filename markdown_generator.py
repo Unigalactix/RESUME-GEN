@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from resume_formatter import build_contact_line, extract_city_state, get_effective_section_order, get_resume_variant_config
 
 def trim_summary(summary, max_chars=420):
@@ -6,6 +7,44 @@ def trim_summary(summary, max_chars=420):
     if len(cleaned) <= max_chars:
         return cleaned
     return cleaned[: max_chars - 3].rstrip() + "..."
+
+
+def parse_resume_date(raw):
+    text = (raw or "").strip()
+    if not text:
+        return datetime.min
+    if text.lower() in {"present", "current", "ongoing"}:
+        return datetime.max
+
+    formats = ["%b %Y", "%B %Y", "%b %d, %Y", "%B %d, %Y", "%Y-%m-%d", "%Y"]
+    for fmt in formats:
+        try:
+            return datetime.strptime(text, fmt)
+        except ValueError:
+            continue
+    return datetime.min
+
+
+def sort_experience(items):
+    return sorted(
+        items,
+        key=lambda item: (
+            parse_resume_date(item.get("end", "")),
+            parse_resume_date(item.get("start", "")),
+        ),
+        reverse=True,
+    )
+
+
+def sort_education(items):
+    return sorted(
+        items,
+        key=lambda item: (
+            parse_resume_date(item.get("end", "")),
+            parse_resume_date(item.get("start", "")),
+        ),
+        reverse=True,
+    )
 
 
 def create_markdown_resume(
@@ -29,7 +68,7 @@ def create_markdown_resume(
     languages = languages or []
     volunteering = volunteering or []
 
-    variant_name = options.get("variant", "ATS-safe")
+    variant_name = options.get("variant", "Software Engineer (ATS-Hybrid)")
     variant_config = get_resume_variant_config(variant_name)
     md = []
 
@@ -62,7 +101,7 @@ def create_markdown_resume(
             
         elif section == "Experience" and experience:
             md.append("## Professional Experience")
-            for job in experience:
+            for job in sort_experience(experience):
                 title_comp = f"**{job.get('title', '')}** at {job.get('company', '')}"
                 date_range = f"{job.get('start', '')} - {job.get('end', '')}"
                 loc = extract_city_state(job.get('location', ''))
@@ -137,7 +176,7 @@ def create_markdown_resume(
                 
         elif section == "Education" and education:
             md.append("## Education")
-            for edu in education:
+            for edu in sort_education(education):
                 md.append(f"### **{edu.get('school', '')}**")
                 degree = edu.get('degree', '').strip()
                 start = edu.get('start', '').strip()

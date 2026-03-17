@@ -28,23 +28,37 @@ DEFAULT_SECTION_ORDER = [
 ]
 
 RESUME_VARIANTS = {
-    "ATS-safe": {
+    "Software Engineer (ATS-Hybrid)": {
         "section_order": ["Summary", "Skills", "Experience", "Projects", "Certifications", "Education"],
-        "include_summary": False,
+        "include_summary": True,
         "max_experience_bullets": 4,
-        "max_project_bullets": 3,
+        "max_project_bullets": 2,
+        "prioritize_projects": False,
+        "description": "Best for most IT/software roles: strong technical skills up top and reverse-chronological experience.",
     },
-    "Recruiter-friendly": {
-        "section_order": ["Summary", "Experience", "Skills", "Projects", "Certifications", "Education", "Languages"],
+    "Experienced Professional": {
+        "section_order": ["Summary", "Skills", "Experience", "Projects", "Education", "Certifications"],
         "include_summary": True,
         "max_experience_bullets": 3,
         "max_project_bullets": 2,
+        "prioritize_projects": False,
+        "description": "For 3+ years experience: concise summary, technical stack, and impact-focused work history.",
     },
-    "New Grad Focus": {
+    "New Grad / Internship": {
         "section_order": ["Summary", "Skills", "Projects", "Experience", "Education", "Certifications", "Languages"],
         "include_summary": True,
         "max_experience_bullets": 3,
         "max_project_bullets": 4,
+        "prioritize_projects": True,
+        "description": "For students and recent grads: projects are emphasized while preserving ATS readability.",
+    },
+    "Career Switch": {
+        "section_order": ["Summary", "Skills", "Projects", "Experience", "Certifications", "Education"],
+        "include_summary": True,
+        "max_experience_bullets": 2,
+        "max_project_bullets": 3,
+        "prioritize_projects": True,
+        "description": "For transition roles: foreground transferable skills and relevant projects before older experience.",
     },
 }
 
@@ -76,13 +90,23 @@ def get_resume_variant_names():
 
 
 def get_resume_variant_config(variant_name):
-    return RESUME_VARIANTS.get(variant_name, RESUME_VARIANTS["ATS-safe"]).copy()
+    return RESUME_VARIANTS.get(variant_name, RESUME_VARIANTS["Software Engineer (ATS-Hybrid)"]).copy()
 
 
 def get_effective_section_order(selected_sections=None, variant_name="ATS-safe"):
     configured_order = get_resume_variant_config(variant_name).get("section_order", [])
     ordered_sections = selected_sections or configured_order
     return ["Header"] + [section for section in ordered_sections if section != "Header"]
+
+
+def get_resume_variant_guidance(variant_name):
+    config = get_resume_variant_config(variant_name)
+    return {
+        "description": config.get("description", "Minimal ATS-readable hybrid resume."),
+        "section_order": config.get("section_order", []),
+        "max_experience_bullets": config.get("max_experience_bullets", 3),
+        "max_project_bullets": config.get("max_project_bullets", 2),
+    }
 
 
 def build_contact_line(profile):

@@ -3,7 +3,7 @@ from data_loader import build_profile_completeness_report, load_all_data
 from matcher import match_skills, format_bullet_points, evaluate_relevance, generate_suggestions, extract_text_from_url
 from markdown_generator import create_markdown_resume
 from pdf_generator import generate_pdf_from_markdown
-from resume_formatter import get_resume_variant_config, get_resume_variant_names, get_section_order
+from resume_formatter import get_resume_variant_config, get_resume_variant_guidance, get_resume_variant_names, get_section_order
 from pdf2image import convert_from_bytes
 
 def display_pdf_preview(pdf_bytes):
@@ -48,6 +48,63 @@ def section_has_content(section_name, data, tailored_experience=None, tailored_p
         return bool(data["education"])
     return False
 
+
+def get_default_sections_for_variant(data, variant_name):
+    return [
+        section for section in get_resume_variant_config(variant_name)["section_order"]
+        if section_has_content(section, data)
+    ]
+
+
+def build_tailored_resume_from_jd(jd_text, data, variant_name, selected_sections):
+    if not selected_sections:
+        raise ValueError("Select at least one resume section.")
+
+    top_skills = match_skills(data["skills"], jd_text, top_n=15)
+
+    variant_config = get_resume_variant_config(variant_name)
+    max_exp_bullets = variant_config.get("max_experience_bullets", 3)
+    max_project_bullets = variant_config.get("max_project_bullets", 2)
+
+    tailored_experience = []
+    for i, job in enumerate(data["positions"]):
+        if i == 0 or evaluate_relevance(job["description"], jd_text):
+            bullets = format_bullet_points(job["description"], jd_text)
+            job_copy = job.copy()
+            job_copy["bullets"] = bullets[:max_exp_bullets]
+            if job_copy["bullets"]:
+                tailored_experience.append(job_copy)
+
+    tailored_projects = []
+    for proj in data["projects"]:
+        if evaluate_relevance(proj["description"], jd_text) or variant_config.get("prioritize_projects"):
+            bullets = format_bullet_points(proj["description"], jd_text)
+            proj_copy = proj.copy()
+            proj_copy["bullets"] = bullets[:max_project_bullets]
+            if proj_copy["bullets"]:
+                tailored_projects.append(proj_copy)
+
+    ai_suggestions = generate_suggestions(jd_text)
+    resume_md = create_markdown_resume(
+        data["profile"],
+        top_skills,
+        tailored_experience,
+        data["education"],
+        tailored_projects,
+        certifications=data["certifications"],
+        publications=data["publications"],
+        languages=data["languages"],
+        volunteering=data["volunteering"],
+        options={
+            "variant": variant_name,
+            "section_order": selected_sections,
+        },
+    )
+    return {
+        "resume_md": resume_md,
+        "ai_suggestions": ai_suggestions,
+    }
+
 def render_resume_generator():
     st.title("📄 AI Resume Generator")
     st.markdown("Upload your LinkedIn export data into the `Data/` folder, paste a job description, and get a tailored PDF resume!")
@@ -58,10 +115,14 @@ def render_resume_generator():
 
     section_choices = [section for section in get_section_order() if section != "Header"]
     variant_name = st.selectbox("Resume variant", get_resume_variant_names())
-    default_sections = [
-        section for section in get_resume_variant_config(variant_name)["section_order"]
-        if section_has_content(section, data)
-    ]
+    variant_guidance = get_resume_variant_guidance(variant_name)
+    st.caption(variant_guidance["description"])
+    st.caption(
+        "Section flow: "
+        + " -> ".join(variant_guidance["section_order"])
+        + f" | Bullets: experience <= {variant_guidance['max_experience_bullets']}, projects <= {variant_guidance['max_project_bullets']}"
+    )
+    default_sections = get_default_sections_for_variant(data, variant_name)
     selected_sections = st.multiselect(
         "Sections to include and order",
         section_choices,
@@ -108,44 +169,16 @@ def render_resume_generator():
                     st.warning("Select at least one resume section to generate a resume.")
                     return
 
-                top_skills = match_skills(data['skills'], jd, top_n=15)
-                
-                tailored_experience = []
-                for i, job in enumerate(data['positions']):
-                    if i == 0 or evaluate_relevance(job['description'], jd):
-                        bullets = format_bullet_points(job['description'], jd)
-                        job_copy = job.copy()
-                        job_copy['bullets'] = bullets[:4]
-                        if job_copy['bullets']: 
-                            tailored_experience.append(job_copy)
-
-                tailored_projects = []
-                for proj in data['projects']:
-                    if evaluate_relevance(proj['description'], jd) or variant_name == "New Grad Focus":
-                        bullets = format_bullet_points(proj['description'], jd)
-                        proj_copy = proj.copy()
-                        proj_copy['bullets'] = bullets[: get_resume_variant_config(variant_name)["max_project_bullets"]]
-                        if proj_copy['bullets']:
-                            tailored_projects.append(proj_copy)
-
-                st.session_state.ai_suggestions = generate_suggestions(jd)
-                st.session_state.resume_variant = variant_name
-
-                st.session_state.resume_md = create_markdown_resume(
-                    data['profile'], 
-                    top_skills, 
-                    tailored_experience, 
-                    data['education'], 
-                    tailored_projects,
-                    certifications=data['certifications'],
-                    publications=data['publications'],
-                    languages=data['languages'],
-                    volunteering=data['volunteering'],
-                    options={
-                        "variant": variant_name,
-                        "section_order": selected_sections,
-                    },
+                package = build_tailored_resume_from_jd(
+                    jd_text=jd,
+                    data=data,
+                    variant_name=variant_name,
+                    selected_sections=selected_sections,
                 )
+
+                st.session_state.ai_suggestions = package["ai_suggestions"]
+                st.session_state.resume_variant = variant_name
+                st.session_state.resume_md = package["resume_md"]
                     
                 st.success("Analysis complete! Review and edit your resume below.")
 

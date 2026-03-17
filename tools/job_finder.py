@@ -1,7 +1,12 @@
 import streamlit as st
 import urllib.parse
 import json
+import requests
 from ai_helper import generate_json
+from matcher import extract_text_from_url
+from pdf_generator import generate_pdf_from_markdown
+from resume_formatter import get_resume_variant_names
+from tools.resume_generator import build_tailored_resume_from_jd, display_pdf_preview, get_data, get_default_sections_for_variant
 
 COMMON_ROLES = [
     "Software Engineer",
@@ -130,6 +135,18 @@ ROLE_FAMILY_SPONSORS = {
     "product": ["Google", "Microsoft", "Amazon", "Meta", "Adobe", "Salesforce", "Uber", "DoorDash"],
     "business": ["Accenture", "Deloitte", "PwC", "KPMG", "Visa", "JPMorgan Chase", "Capgemini", "Cognizant"],
     "general": ["Amazon", "Google", "Microsoft", "Accenture", "Deloitte", "Salesforce", "Adobe", "Oracle"],
+}
+
+GREENHOUSE_SLUGS = {
+    "Databricks": "databricks",
+    "Snowflake": "snowflake",
+    "DoorDash": "doordash",
+    "Wayfair": "wayfair",
+}
+
+LEVER_SLUGS = {
+    "NVIDIA": "nvidia",
+    "Databricks": "databricks",
 }
 
 
@@ -321,6 +338,174 @@ def generate_ats_specific_links(company, filters):
     return links
 
 
+def location_matches(job_location, target_location):
+    if not target_location:
+        return True
+    normalized_target = target_location.lower().strip()
+    normalized_location = (job_location or "").lower().strip()
+    if not normalized_location:
+        return False
+    if normalized_target in normalized_location:
+        return True
+    if normalized_target == "remote" and "remote" in normalized_location:
+        return True
+    return False
+
+
+def role_matches(job_title, target_role):
+    if not target_role:
+        return True
+    normalized_title = (job_title or "").lower()
+    normalized_role = target_role.lower()
+    role_words = [word for word in normalized_role.split() if len(word) > 2]
+    if normalized_role in normalized_title:
+        return True
+    return sum(1 for word in role_words if word in normalized_title) >= max(1, min(2, len(role_words)))
+
+
+def fetch_greenhouse_jobs(slug):
+    try:
+        url = f"https://boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=true"
+        response = requests.get(url, timeout=12)
+        response.raise_for_status()
+        payload = response.json()
+        jobs = []
+        for item in payload.get("jobs", []):
+            jobs.append(
+                {
+                    "title": item.get("title", ""),
+                    "location": item.get("location", {}).get("name", ""),
+                    "url": item.get("absolute_url", ""),
+                    "description": item.get("content", ""),
+                    "source": "Greenhouse",
+                }
+            )
+        return jobs
+    except Exception:
+        return []
+
+
+def fetch_lever_jobs(slug):
+    try:
+        url = f"https://api.lever.co/v0/postings/{slug}?mode=json"
+        response = requests.get(url, timeout=12)
+        response.raise_for_status()
+        payload = response.json()
+        jobs = []
+        for item in payload:
+            jobs.append(
+                {
+                    "title": item.get("text", ""),
+                    "location": item.get("categories", {}).get("location", ""),
+                    "url": item.get("hostedUrl", ""),
+                    "description": item.get("descriptionPlain", ""),
+                    "source": "Lever",
+                }
+            )
+        return jobs
+    except Exception:
+        return []
+
+
+def get_company_career_page(company, role, location):
+    query = f"{company} careers {role} {location}".strip()
+    encoded = urllib.parse.quote_plus(query)
+    return f"https://www.google.com/search?q={encoded}"
+
+
+def fetch_live_jobs_for_company(company, target_role, target_location):
+    jobs = []
+
+    greenhouse_slug = GREENHOUSE_SLUGS.get(company)
+    lever_slug = LEVER_SLUGS.get(company)
+
+    if greenhouse_slug:
+        jobs.extend(fetch_greenhouse_jobs(greenhouse_slug))
+    if lever_slug:
+        jobs.extend(fetch_lever_jobs(lever_slug))
+
+    filtered = []
+    for job in jobs:
+        if not role_matches(job.get("title", ""), target_role):
+            continue
+        if not location_matches(job.get("location", ""), target_location):
+            continue
+        filtered.append(job)
+    return filtered
+
+
+def render_inline_resume_builder():
+    selected_job = st.session_state.get("jobfinder_selected_job")
+    if not selected_job:
+        return
+
+    st.markdown("---")
+    st.subheader("📄 ATS Resume Builder For Selected Job")
+    st.write(f"Selected job: {selected_job.get('title', 'Role')} at {selected_job.get('company', 'Company')}")
+    if selected_job.get("location"):
+        st.write(f"Location: {selected_job.get('location')}")
+
+    st.link_button("Apply Now", selected_job.get("url", "https://www.google.com"), use_container_width=True)
+
+    data = get_data()
+    variant_name = st.selectbox("Resume variant for this job", get_resume_variant_names(), key="jobfinder_resume_variant")
+    default_sections = get_default_sections_for_variant(data, variant_name)
+    all_sections = [
+        "Summary", "Skills", "Experience", "Projects", "Certifications", "Publications", "Volunteering", "Languages", "Education"
+    ]
+    selected_sections = st.multiselect(
+        "Sections to include",
+        all_sections,
+        default=default_sections,
+        key="jobfinder_resume_sections",
+    )
+
+    if st.button("Generate ATS Resume for Selected Job", key="jobfinder_generate_resume", use_container_width=True):
+        jd_text = (selected_job.get("description") or "").strip()
+        if len(jd_text) < 200 and selected_job.get("url"):
+            jd_text = extract_text_from_url(selected_job["url"])
+        if not jd_text or str(jd_text).startswith("ERROR:"):
+            st.error("Could not extract a usable job description from the selected link.")
+            return
+
+        with st.spinner("Generating ATS resume for this job..."):
+            package = build_tailored_resume_from_jd(
+                jd_text=jd_text,
+                data=data,
+                variant_name=variant_name,
+                selected_sections=selected_sections,
+            )
+
+            st.session_state.jobfinder_resume_md = package["resume_md"]
+            st.session_state.jobfinder_ai_suggestions = package.get("ai_suggestions", [])
+
+    if st.session_state.get("jobfinder_ai_suggestions"):
+        with st.expander("AI Suggestions For This Job", expanded=True):
+            for suggestion in st.session_state["jobfinder_ai_suggestions"]:
+                st.write(f"- {suggestion}")
+
+    if st.session_state.get("jobfinder_resume_md"):
+        edited_md = st.text_area(
+            "Generated ATS Resume (editable)",
+            value=st.session_state["jobfinder_resume_md"],
+            height=420,
+            key="jobfinder_resume_editor",
+        )
+        st.session_state.jobfinder_resume_md = edited_md
+
+        if st.button("Create PDF and Download", key="jobfinder_download_resume", use_container_width=True):
+            pdf_bytes = generate_pdf_from_markdown(st.session_state.jobfinder_resume_md)
+            st.download_button(
+                label="Download ATS Resume PDF",
+                data=pdf_bytes,
+                file_name="ATS_Tailored_Resume.pdf",
+                mime="application/pdf",
+                key="jobfinder_download_btn",
+            )
+            st.markdown("### PDF Preview")
+            display_pdf_preview(pdf_bytes)
+
+
 def render_job_finder():
     st.title("🔍 Job Finder & Company Targeter")
     st.markdown(
@@ -359,6 +544,7 @@ def render_job_finder():
     col3, col4 = st.columns(2)
     with col3:
         target_location = st.text_input("Location", "Remote")
+        strict_location = st.checkbox("Only exact/contains location matches", value=True)
         experience_level = st.selectbox(
             "Experience level",
             ["Any", "Internship", "New Grad", "Entry Level", "Mid Level", "Senior"],
@@ -385,6 +571,7 @@ def render_job_finder():
         filters = {
             "role": target_role.strip(),
             "location": target_location.strip(),
+            "strict_location": strict_location,
             "experience_level": experience_level,
             "job_modes": job_modes,
             "industries": industries,
@@ -437,4 +624,38 @@ def render_job_finder():
                             [f"[{label}]({url})" for label, url in ats_links.items()]
                         )
                     )
+                    career_page = get_company_career_page(company, filters["role"], filters["location"])
+                    st.link_button("Company Career Page", career_page, use_container_width=True)
+
+                    live_jobs = fetch_live_jobs_for_company(company, filters["role"], filters["location"] if filters["strict_location"] else "")
+                    if live_jobs:
+                        st.success(f"Found {len(live_jobs)} location-matched live jobs for {company}.")
+                        for idx, job in enumerate(live_jobs[:4], start=1):
+                            st.write(f"{idx}. {job.get('title', '')} | {job.get('location', '')} | {job.get('source', '')}")
+                            job_col1, job_col2 = st.columns(2)
+                            with job_col1:
+                                st.link_button(
+                                    "Apply Now",
+                                    job.get("url") or career_page,
+                                    key=f"apply_{normalize_company_name(company)}_{idx}",
+                                    use_container_width=True,
+                                )
+                            with job_col2:
+                                if st.button(
+                                    "ATS Resume Generator",
+                                    key=f"resume_{normalize_company_name(company)}_{idx}",
+                                    use_container_width=True,
+                                ):
+                                    st.session_state.jobfinder_selected_job = {
+                                        "company": company,
+                                        "title": job.get("title", filters["role"]),
+                                        "location": job.get("location", filters["location"]),
+                                        "url": job.get("url", career_page),
+                                        "description": job.get("description", ""),
+                                    }
+                    else:
+                        st.info("No direct ATS jobs found for this company with current location filter. Use the career page and ATS links above.")
+
                     st.markdown("---")
+
+                render_inline_resume_builder()

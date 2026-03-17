@@ -30,6 +30,7 @@ def generate_pdf_from_markdown(markdown_text):
     pdf = ResumePDF()
     pdf.set_auto_page_break(auto=True, margin=10)
     pdf.add_page()
+    pdf.set_text_color(0, 0, 0)
     
     # 1. Very tight margins
     pdf.set_margins(left=12, top=12, right=12)
@@ -44,21 +45,16 @@ def generate_pdf_from_markdown(markdown_text):
             
         if line_clean.startswith('# '):
             # Main Header (Name)
-            pdf.set_font("helvetica", "B", 18)
-            pdf.set_text_color(31, 78, 121) # Dark Blue (matches typical template blue)
-            pdf.cell(0, 8, line_clean[2:], ln=True, align='C')
-            pdf.ln(1)
+            pdf.set_font("helvetica", "B", 16)
+            pdf.cell(0, 7, line_clean[2:], ln=True, align='L')
+            pdf.ln(0.5)
             
         elif line_clean.startswith('## '):
             # Section Titles
-            pdf.ln(3) # Space before new section
-            pdf.set_font("helvetica", "B", 12)
-            pdf.set_text_color(0, 51, 102) # Dark Blue
-            pdf.cell(0, 5, line_clean[3:], ln=True)
-            pdf.set_draw_color(0, 51, 102)
-            pdf.line(pdf.get_x(), pdf.get_y(), pdf.get_x() + 186, pdf.get_y())
             pdf.ln(2)
-            pdf.set_text_color(0, 0, 0) # Reset to black
+            pdf.set_font("helvetica", "B", 11)
+            pdf.cell(0, 5, line_clean[3:], ln=True)
+            pdf.ln(1)
             
         elif line_clean.startswith('### '):
             # Job Titles / Schools / Projects
@@ -76,8 +72,8 @@ def generate_pdf_from_markdown(markdown_text):
             pdf.set_font("helvetica", "", 10)
             contact_text = line_clean.replace('**Contact:**', '').strip()
             contact_text = contact_text.replace('-', '\xb7')
-            pdf.multi_cell(0, 5, contact_text, align='C')
-            pdf.ln(2)
+            pdf.multi_cell(0, 4, contact_text, align='L')
+            pdf.ln(1)
             
         elif line_clean.startswith('*') and line_clean.endswith('*'):
             # Italicized dates/locations
