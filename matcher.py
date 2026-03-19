@@ -6,6 +6,14 @@ from ai_helper import generate_json, generate_text, is_ai_configured
 from resume_formatter import ATS_SYSTEM_INSTRUCTION
 
 
+STOPWORDS = {
+    "a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "in", "into", "is", "it",
+    "of", "on", "or", "that", "the", "to", "with", "will", "your", "you", "our", "their", "this",
+    "using", "use", "build", "built", "role", "company", "target", "job", "experience", "project",
+    "work", "working", "team", "teams", "across", "strong", "relevant", "skills", "skill", "tools",
+}
+
+
 ROLE_TARGET_PROFILES = [
     {
         "keywords": ["backend", "software engineer", "software developer", "full stack", "full-stack"],
@@ -123,6 +131,95 @@ def clean_text(text):
     if not isinstance(text, str):
         return ""
     return ' '.join(str(text).split())
+
+
+def extract_target_keywords(text, max_keywords=25):
+    cleaned = clean_text(text).lower()
+    if not cleaned:
+        return []
+
+    counts = {}
+    for token in re.findall(r"[a-z0-9][a-z0-9\+\.#/-]{1,}", cleaned):
+        normalized = token.strip("-./")
+        if len(normalized) < 3 or normalized in STOPWORDS:
+            continue
+        counts[normalized] = counts.get(normalized, 0) + 1
+
+    ranked = sorted(counts.items(), key=lambda item: (-item[1], -len(item[0]), item[0]))
+    return [keyword for keyword, _ in ranked[:max_keywords]]
+
+
+def build_targeting_context(jd_text, company_name="", role_name=""):
+    context_parts = [clean_text(jd_text), clean_text(company_name), clean_text(role_name)]
+    combined_text = " ".join(part for part in context_parts if part)
+    keywords = extract_target_keywords(combined_text)
+    return {
+        "text": combined_text,
+        "keywords": keywords,
+        "keyword_set": set(keywords),
+        "company_name": clean_text(company_name).lower(),
+        "role_name": clean_text(role_name).lower(),
+    }
+
+
+def score_target_alignment(text, targeting_context, extra_terms=None):
+    combined_text = clean_text(text).lower()
+    if not combined_text:
+        return 0
+
+    token_set = set(extract_target_keywords(combined_text, max_keywords=40))
+    overlap = len(token_set & targeting_context["keyword_set"])
+    substring_bonus = 0
+    for term in extra_terms or []:
+        normalized_term = clean_text(term).lower()
+        if normalized_term and normalized_term in combined_text:
+            substring_bonus += 2
+
+    role_word_bonus = 0
+    for role_word in extract_target_keywords(targeting_context.get("role_name", ""), max_keywords=10):
+        if role_word in combined_text:
+            role_word_bonus += 2
+
+    return overlap * 3 + substring_bonus + role_word_bonus
+
+
+def select_top_relevant_items(items, targeting_context, text_builder, max_items=3, min_score=1):
+    ranked_items = []
+    for index, item in enumerate(items):
+        item_text = text_builder(item)
+        extra_terms = []
+        if targeting_context.get("company_name"):
+            extra_terms.append(targeting_context["company_name"])
+        if targeting_context.get("role_name"):
+            extra_terms.append(targeting_context["role_name"])
+
+        score = score_target_alignment(item_text, targeting_context, extra_terms=extra_terms)
+        ranked_items.append((score, -index, item))
+
+    ranked_items.sort(key=lambda entry: (entry[0], entry[1]), reverse=True)
+    selected = [item for score, _, item in ranked_items if score >= min_score][:max_items]
+
+    if len(selected) >= 2:
+        return selected
+    return [item for _, _, item in ranked_items[: min(max_items, len(ranked_items))]]
+
+
+def get_matched_keywords(item_text, targeting_context):
+    """Returns sorted list of target keywords that appear in the given item text."""
+    cleaned = clean_text(item_text).lower()
+    if not cleaned:
+        return []
+    token_set = set(extract_target_keywords(cleaned, max_keywords=40))
+    return sorted(token_set & targeting_context["keyword_set"])
+
+
+def is_locally_relevant(item_text, targeting_context, min_score=1):
+    """
+    Fast local keyword-based relevance gate using score_target_alignment.
+    Returns True when the item meets the minimum overlap threshold,
+    replacing LLM evaluate_relevance calls for pre-ranked candidate items.
+    """
+    return score_target_alignment(item_text, targeting_context) >= min_score
 
 
 def infer_role_target_profile(role_name):

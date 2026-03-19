@@ -474,6 +474,8 @@ def render_inline_resume_builder():
                 data=data,
                 variant_name=variant_name,
                 selected_sections=selected_sections,
+                company_name=selected_job.get("company", ""),
+                role_name=selected_job.get("title", ""),
             )
 
             st.session_state.jobfinder_resume_md = package["resume_md"]
