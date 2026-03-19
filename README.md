@@ -8,7 +8,7 @@ An AI-powered career optimization tool built with **Streamlit** and **Google Gem
 
 | Tool | Description |
 |---|---|
-| 📄 **AI Resume Generator** | Tailors your resume to a job description using LinkedIn export data, supports section toggles and resume variants, and outputs editable Markdown plus a downloadable PDF. |
+| 📄 **AI Resume Generator** | Tailors your resume to a job description or an inferred company-and-role target using LinkedIn export data, supports section toggles and resume variants, and outputs editable Markdown plus a downloadable PDF. |
 | 📊 **Resume Score** | Analyzes how well your existing PDF resume matches a job description and now returns a score breakdown, gap map, rewrite priorities, and suggested replacement bullets. |
 | 🔍 **Job Finder** | Identifies top hiring companies for your target role, adds structured filters for work authorization and job preferences, and generates Google Dork plus ATS-specific search links for company job boards. |
 
@@ -113,7 +113,7 @@ When the API key is missing, the app now surfaces a visible warning and AI-assis
 ### AI Resume Generator
 
 1. Navigate to **AI Resume Generator** from the sidebar
-2. Paste a job description or enter a job posting URL
+2. Paste a job description, enter a job posting URL, or provide a company name plus target role when no JD is available
 3. Choose a **resume variant** and pick the sections you want to include
 4. Click **Generate Tailored Resume**
 5. Review the generated Markdown resume, profile completeness insights, and AI keyword suggestions

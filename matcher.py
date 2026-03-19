@@ -5,6 +5,106 @@ from bs4 import BeautifulSoup
 from ai_helper import generate_json, generate_text, is_ai_configured
 from resume_formatter import ATS_SYSTEM_INSTRUCTION
 
+
+ROLE_TARGET_PROFILES = [
+    {
+        "keywords": ["backend", "software engineer", "software developer", "full stack", "full-stack"],
+        "responsibilities": [
+            "design and ship production software features",
+            "improve system reliability, scalability, and latency",
+            "collaborate with product and cross-functional teams",
+            "write maintainable code, tests, and documentation",
+        ],
+        "skills": ["Python", "Java", "APIs", "System Design", "Testing", "Distributed Systems"],
+        "tools": ["Git", "Docker", "CI/CD", "SQL"],
+        "domain_terms": ["scalability", "performance", "ownership", "production systems"],
+    },
+    {
+        "keywords": ["frontend", "ui", "web engineer"],
+        "responsibilities": [
+            "build responsive user interfaces and product experiences",
+            "improve usability, accessibility, and performance",
+            "partner with design and product stakeholders",
+            "maintain reusable components and front-end quality standards",
+        ],
+        "skills": ["JavaScript", "TypeScript", "React", "CSS", "Accessibility", "Testing"],
+        "tools": ["React", "HTML", "CSS", "Git", "Design Systems"],
+        "domain_terms": ["user experience", "accessibility", "component architecture", "performance"],
+    },
+    {
+        "keywords": ["data engineer", "analytics engineer"],
+        "responsibilities": [
+            "build reliable data pipelines and transformation workflows",
+            "improve data quality, lineage, and observability",
+            "model datasets for analytics and downstream consumers",
+            "work with stakeholders to operationalize reporting needs",
+        ],
+        "skills": ["Python", "SQL", "ETL", "Data Modeling", "Batch Processing", "Automation"],
+        "tools": ["Airflow", "Spark", "dbt", "Warehouse Platforms"],
+        "domain_terms": ["data reliability", "pipelines", "warehousing", "governance"],
+    },
+    {
+        "keywords": ["data scientist", "analyst", "business analyst"],
+        "responsibilities": [
+            "analyze data to identify trends and business opportunities",
+            "build dashboards, experiments, and decision-support models",
+            "communicate findings to technical and non-technical partners",
+            "translate ambiguous questions into measurable insights",
+        ],
+        "skills": ["SQL", "Python", "Statistics", "Experimentation", "Visualization", "Storytelling"],
+        "tools": ["Tableau", "Power BI", "Jupyter", "Excel"],
+        "domain_terms": ["insights", "KPIs", "experimentation", "stakeholder communication"],
+    },
+    {
+        "keywords": ["machine learning", "ml", "ai engineer"],
+        "responsibilities": [
+            "build, evaluate, and deploy machine learning solutions",
+            "improve model performance, monitoring, and reliability",
+            "prepare data and features for experimentation and production",
+            "partner with engineering teams to operationalize ML workflows",
+        ],
+        "skills": ["Python", "Machine Learning", "Model Evaluation", "Data Processing", "Experimentation", "MLOps"],
+        "tools": ["PyTorch", "TensorFlow", "MLflow", "Docker"],
+        "domain_terms": ["model performance", "feature engineering", "inference", "deployment"],
+    },
+    {
+        "keywords": ["devops", "cloud", "sre", "platform", "infrastructure"],
+        "responsibilities": [
+            "improve deployment automation and release reliability",
+            "monitor production systems and respond to incidents",
+            "harden infrastructure, observability, and operational processes",
+            "partner with engineers to improve platform efficiency",
+        ],
+        "skills": ["Cloud Infrastructure", "Automation", "Scripting", "Incident Response", "Reliability", "Networking"],
+        "tools": ["AWS", "Azure", "GCP", "Terraform", "Kubernetes", "CI/CD"],
+        "domain_terms": ["availability", "monitoring", "infrastructure", "operational excellence"],
+    },
+    {
+        "keywords": ["product manager", "product"],
+        "responsibilities": [
+            "define product requirements and prioritize roadmap work",
+            "align engineering, design, and business stakeholders",
+            "analyze outcomes and iterate on product decisions",
+            "drive execution from discovery through launch",
+        ],
+        "skills": ["Roadmapping", "Prioritization", "Stakeholder Management", "Analytics", "Communication", "Execution"],
+        "tools": ["SQL", "Product Analytics", "A/B Testing", "Documentation"],
+        "domain_terms": ["roadmap", "user needs", "launches", "product strategy"],
+    },
+]
+
+DEFAULT_ROLE_TARGET_PROFILE = {
+    "responsibilities": [
+        "deliver measurable business impact in the target role",
+        "collaborate effectively with cross-functional stakeholders",
+        "solve operational or technical problems with clear ownership",
+        "communicate outcomes, tradeoffs, and progress clearly",
+    ],
+    "skills": ["Problem Solving", "Communication", "Execution", "Collaboration", "Analysis", "Ownership"],
+    "tools": ["Documentation", "Analytics", "Automation"],
+    "domain_terms": ["impact", "stakeholders", "delivery", "results"],
+}
+
 def extract_text_from_url(url):
     """Fetches and cleans visible text from a URL."""
     try:
@@ -23,6 +123,100 @@ def clean_text(text):
     if not isinstance(text, str):
         return ""
     return ' '.join(str(text).split())
+
+
+def infer_role_target_profile(role_name):
+    normalized_role = clean_text(role_name).lower()
+    for profile in ROLE_TARGET_PROFILES:
+        if any(keyword in normalized_role for keyword in profile["keywords"]):
+            return {
+                "responsibilities": profile["responsibilities"][:],
+                "skills": profile["skills"][:],
+                "tools": profile["tools"][:],
+                "domain_terms": profile["domain_terms"][:],
+            }
+    return {
+        "responsibilities": DEFAULT_ROLE_TARGET_PROFILE["responsibilities"][:],
+        "skills": DEFAULT_ROLE_TARGET_PROFILE["skills"][:],
+        "tools": DEFAULT_ROLE_TARGET_PROFILE["tools"][:],
+        "domain_terms": DEFAULT_ROLE_TARGET_PROFILE["domain_terms"][:],
+    }
+
+
+def render_target_role_brief(company_name, role_name, profile):
+    summary = clean_text(profile.get("summary")) or (
+        f"Target role: {role_name} at {company_name}. Focus the resume on quantified results, relevant tools, "
+        "and evidence of direct fit for the role."
+    )
+    responsibilities = [clean_text(item) for item in profile.get("responsibilities", []) if clean_text(item)]
+    skills = [clean_text(item) for item in profile.get("skills", []) if clean_text(item)]
+    tools = [clean_text(item) for item in profile.get("tools", []) if clean_text(item)]
+    domain_terms = [clean_text(item) for item in profile.get("domain_terms", []) if clean_text(item)]
+
+    parts = [
+        f"Target Company: {company_name}",
+        f"Target Role: {role_name}",
+        f"Role Summary: {summary}",
+    ]
+    if responsibilities:
+        parts.append("Core Responsibilities: " + "; ".join(responsibilities[:5]))
+    if skills:
+        parts.append("Priority Skills: " + ", ".join(skills[:8]))
+    if tools:
+        parts.append("Likely Tools: " + ", ".join(tools[:6]))
+    if domain_terms:
+        parts.append("Relevant Terms: " + ", ".join(domain_terms[:6]))
+    return "\n".join(parts)
+
+
+def build_target_role_brief(company_name, role_name, prefer_ai=True):
+    company = clean_text(company_name)
+    role = clean_text(role_name)
+    if not company or not role:
+        raise ValueError("Both company name and role name are required.")
+
+    fallback_profile = infer_role_target_profile(role)
+    fallback_profile["summary"] = (
+        f"Inferred hiring brief for a {role} opening at {company}. Emphasize directly relevant experience, strong execution, "
+        "measurable impact, and tools typically expected for this role."
+    )
+
+    if not prefer_ai or not is_ai_configured():
+        return render_target_role_brief(company, role, fallback_profile)
+
+    prompt = f"""
+    Create a compact ATS-focused hiring brief for a candidate targeting the following opening.
+
+    Company: {company}
+    Role: {role}
+
+    Return ONLY raw JSON using this exact schema:
+    {{
+        "summary": "string",
+        "responsibilities": ["string"],
+        "skills": ["string"],
+        "tools": ["string"],
+        "domain_terms": ["string"]
+    }}
+
+    Requirements:
+    - Keep the summary to 1-2 sentences.
+    - responsibilities: 4-5 items.
+    - skills: 6-8 items.
+    - tools: up to 6 items.
+    - domain_terms: 4-6 items.
+    - Focus on likely hiring expectations, not culture or benefits.
+    - Avoid markdown.
+    """
+
+    try:
+        profile = generate_json(prompt, fallback=fallback_profile)
+        if not isinstance(profile, dict):
+            profile = fallback_profile
+    except Exception:
+        profile = fallback_profile
+
+    return render_target_role_brief(company, role, profile)
 
 def match_skills(skills, job_description, top_n=15):
     """

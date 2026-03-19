@@ -1,10 +1,51 @@
 import streamlit as st
 from data_loader import build_profile_completeness_report, load_all_data
-from matcher import match_skills, format_bullet_points, evaluate_relevance, generate_suggestions, extract_text_from_url
+from matcher import build_target_role_brief, match_skills, format_bullet_points, evaluate_relevance, generate_suggestions, extract_text_from_url
 from markdown_generator import create_markdown_resume
 from pdf_generator import generate_pdf_from_markdown
 from resume_formatter import get_resume_variant_config, get_resume_variant_guidance, get_resume_variant_names, get_section_order
 from pdf2image import convert_from_bytes
+
+
+COMPANY_REFERENCE_OPTIONS = [
+    "Select a company reference",
+    "Amazon",
+    "Google",
+    "Microsoft",
+    "Meta",
+    "Apple",
+    "NVIDIA",
+    "Databricks",
+    "Snowflake",
+    "Salesforce",
+    "ServiceNow",
+    "Uber",
+    "DoorDash",
+    "Visa",
+    "JPMorgan Chase",
+    "Adobe",
+    "Deloitte",
+    "Accenture",
+]
+
+ROLE_REFERENCE_OPTIONS = [
+    "Select a role reference",
+    "Software Engineer",
+    "Backend Engineer",
+    "Frontend Engineer",
+    "Full Stack Engineer",
+    "Data Engineer",
+    "Data Analyst",
+    "Data Scientist",
+    "Machine Learning Engineer",
+    "AI Engineer",
+    "DevOps Engineer",
+    "Cloud Engineer",
+    "Product Manager",
+    "Business Analyst",
+    "QA Engineer",
+    "Solutions Architect",
+]
 
 def display_pdf_preview(pdf_bytes):
     """Converts PDF bytes to an image preview so browsers cannot block embedded PDF rendering."""
@@ -54,6 +95,13 @@ def get_default_sections_for_variant(data, variant_name):
         section for section in get_resume_variant_config(variant_name)["section_order"]
         if section_has_content(section, data)
     ]
+
+
+def resolve_reference_value(custom_value, selected_value, placeholder):
+    custom_clean = (custom_value or "").strip()
+    if custom_clean:
+        return custom_clean
+    return "" if selected_value == placeholder else selected_value
 
 
 def build_tailored_resume_from_jd(jd_text, data, variant_name, selected_sections):
@@ -107,7 +155,9 @@ def build_tailored_resume_from_jd(jd_text, data, variant_name, selected_sections
 
 def render_resume_generator():
     st.title("📄 AI Resume Generator")
-    st.markdown("Upload your LinkedIn export data into the `Data/` folder, paste a job description, and get a tailored PDF resume!")
+    st.markdown(
+        "Upload your LinkedIn export data into the `Data/` folder, then generate a tailored PDF resume from either a job description or a company-and-role target."
+    )
 
     with st.spinner("Loading profile data..."):
         data = get_data()
@@ -150,20 +200,52 @@ def render_resume_generator():
 
     st.subheader("1. Enter Job Description or URL")
     jd_input = st.text_area("Paste the Job Description text OR a link to the job posting:", height=200)
+    st.caption("If the application does not show a full job description, use the company and role inputs below instead.")
+
+    st.subheader("2. Or build from company + role")
+    st.caption("Choose a reference from the dropdowns or type your own values. The app will infer a compact target brief when no JD is available.")
+    company_col, role_col = st.columns(2)
+    with company_col:
+        selected_company_reference = st.selectbox("Company reference", COMPANY_REFERENCE_OPTIONS)
+        custom_company_name = st.text_input("Or type company name", placeholder="e.g. Stripe")
+    with role_col:
+        selected_role_reference = st.selectbox("Role reference", ROLE_REFERENCE_OPTIONS)
+        custom_role_name = st.text_input("Or type role name", placeholder="e.g. Staff Backend Engineer")
 
     if st.button("Generate Tailored Resume"):
-        if not jd_input.strip():
-            st.warning("Please enter a job description or URL.")
+        company_name = resolve_reference_value(
+            custom_company_name,
+            selected_company_reference,
+            "Select a company reference",
+        )
+        role_name = resolve_reference_value(
+            custom_role_name,
+            selected_role_reference,
+            "Select a role reference",
+        )
+
+        if not jd_input.strip() and (not company_name or not role_name):
+            st.warning("Provide either a job description or both company and role inputs.")
         else:
             with st.spinner("Processing input and tailoring your resume..."):
                 jd = jd_input.strip()
-                
+                target_brief = ""
+
                 if jd.startswith("http://") or jd.startswith("https://"):
                     jd = extract_text_from_url(jd)
                     if jd.startswith("ERROR:"):
                         st.error(f"Failed to extract text from URL: {jd}")
                         st.stop()
                     st.info("Successfully extracted text from the provided URL.")
+
+                if not jd:
+                    try:
+                        target_brief = build_target_role_brief(company_name, role_name)
+                    except ValueError as err:
+                        st.error(str(err))
+                        st.stop()
+                    jd = target_brief
+                    st.info(f"No job description provided. Using an inferred target brief for {role_name} at {company_name}.")
 
                 if not selected_sections:
                     st.warning("Select at least one resume section to generate a resume.")
@@ -179,11 +261,20 @@ def render_resume_generator():
                 st.session_state.ai_suggestions = package["ai_suggestions"]
                 st.session_state.resume_variant = variant_name
                 st.session_state.resume_md = package["resume_md"]
-                    
+                st.session_state.resume_target_brief = target_brief
+                st.session_state.resume_target_company = company_name
+                st.session_state.resume_target_role = role_name
+
                 st.success("Analysis complete! Review and edit your resume below.")
 
     if 'resume_md' in st.session_state:
         st.subheader("2. Review & Edit Resume (Markdown)")
+
+        if st.session_state.get("resume_target_brief"):
+            company_name = st.session_state.get("resume_target_company", "Target company")
+            role_name = st.session_state.get("resume_target_role", "Target role")
+            with st.expander(f"Inferred target brief for {role_name} at {company_name}", expanded=False):
+                st.write(st.session_state["resume_target_brief"])
         
         if st.session_state.get('ai_suggestions'):
             with st.expander("💡 AI Content Suggestions (Based on Role)", expanded=True):
