@@ -149,6 +149,9 @@ LEVER_SLUGS = {
     "Databricks": "databricks",
 }
 
+MAX_LIVE_JOBS_PER_COMPANY = 4
+MAX_TOTAL_LIVE_JOBS = 20
+
 
 def normalize_company_name(name):
     return "".join(ch for ch in name.lower() if ch.isalnum())
@@ -434,6 +437,132 @@ def fetch_live_jobs_for_company(company, target_role, target_location):
     return filtered
 
 
+def collect_live_jobs(suggestions, filters, max_jobs_per_company=MAX_LIVE_JOBS_PER_COMPANY, max_total_jobs=MAX_TOTAL_LIVE_JOBS):
+    collected = []
+    seen = set()
+
+    for item in suggestions:
+        company = item.get("company", "Unknown")
+        career_page = get_company_career_page(company, filters["role"], filters["location"])
+        search_link = generate_google_dork(company, filters)
+        live_jobs = fetch_live_jobs_for_company(
+            company,
+            filters["role"],
+            filters["location"] if filters["strict_location"] else "",
+        )
+
+        for job in live_jobs[:max_jobs_per_company]:
+            dedupe_key = (
+                normalize_company_name(company),
+                (job.get("title", "") or "").strip().lower(),
+                (job.get("location", "") or "").strip().lower(),
+                (job.get("url", "") or "").strip().lower(),
+            )
+            if dedupe_key in seen:
+                continue
+            seen.add(dedupe_key)
+            collected.append(
+                {
+                    "company": company,
+                    "title": job.get("title", filters["role"]),
+                    "location": job.get("location", filters["location"]),
+                    "url": job.get("url", career_page),
+                    "description": job.get("description", ""),
+                    "source": job.get("source", "Company ATS"),
+                    "reason": item.get("reason", "Relevant employer for this target role."),
+                    "sponsorship_signal": item.get(
+                        "sponsorship_signal",
+                        "Known sponsor" if is_known_h1b_sponsor(company) else "Unknown",
+                    ),
+                    "visa_fit": item.get(
+                        "visa_fit",
+                        "Historically active in sponsorship." if is_known_h1b_sponsor(company) else "Confirm sponsorship policy on the posting.",
+                    ),
+                    "career_page": career_page,
+                    "search_link": search_link,
+                    "ats_links": generate_ats_specific_links(company, filters),
+                }
+            )
+            if len(collected) >= max_total_jobs:
+                return collected
+
+    return collected
+
+
+def render_job_listing(job, index_prefix):
+    title = job.get("title", "Role")
+    company = job.get("company", "Company")
+    location = job.get("location", "")
+    source = job.get("source", "Company ATS")
+
+    st.markdown(f"### **{title}**")
+    st.markdown(f"**{company}**")
+    meta_parts = [part for part in [location, source, job.get("sponsorship_signal", "")] if part]
+    if meta_parts:
+        st.caption(" | ".join(meta_parts))
+
+    if job.get("reason"):
+        st.write(job["reason"])
+    if job.get("visa_fit"):
+        st.write(f"Visa note: {job['visa_fit']}")
+
+    action_col1, action_col2, action_col3 = st.columns(3)
+    with action_col1:
+        st.link_button(
+            "Apply Now",
+            job.get("url") or job.get("career_page") or "https://www.google.com",
+            key=f"apply_{index_prefix}",
+            use_container_width=True,
+        )
+    with action_col2:
+        st.link_button(
+            "Search More",
+            job.get("search_link") or job.get("career_page") or "https://www.google.com",
+            key=f"search_{index_prefix}",
+            use_container_width=True,
+        )
+    with action_col3:
+        if st.button("ATS Resume Generator", key=f"resume_{index_prefix}", use_container_width=True):
+            st.session_state.jobfinder_selected_job = {
+                "company": company,
+                "title": title,
+                "location": location,
+                "url": job.get("url", job.get("career_page", "https://www.google.com")),
+                "description": job.get("description", ""),
+            }
+
+    ats_links = job.get("ats_links", {})
+    if ats_links:
+        st.caption(" | ".join([f"[{label}]({url})" for label, url in ats_links.items()]))
+
+
+def render_company_suggestion_card(item, filters):
+    company = item.get("company", "Unknown")
+    reason = item.get("reason", "")
+    sponsorship_signal = item.get("sponsorship_signal", "Unknown")
+    visa_fit = item.get("visa_fit", "Confirm sponsorship details on the job posting.")
+
+    search_link = generate_google_dork(company, filters)
+    ats_links = generate_ats_specific_links(company, filters)
+    career_page = get_company_career_page(company, filters["role"], filters["location"])
+    live_jobs = fetch_live_jobs_for_company(company, filters["role"], filters["location"] if filters["strict_location"] else "")
+
+    st.markdown(f"### **{company}**")
+    st.markdown(f"*{reason}*")
+    st.write(f"Sponsorship signal: {sponsorship_signal}")
+    st.write(f"Visa note: {visa_fit}")
+    st.markdown(f"[🔍 Search active {filters['role']} listings at {company} on Google]({search_link})")
+    st.caption(" | ".join([f"[{label}]({url})" for label, url in ats_links.items()]))
+    st.link_button("Company Career Page", career_page, key=f"career_{normalize_company_name(company)}", use_container_width=True)
+
+    if live_jobs:
+        st.success(f"Found {len(live_jobs)} location-matched live jobs for {company}.")
+        for idx, job in enumerate(live_jobs[:MAX_LIVE_JOBS_PER_COMPANY], start=1):
+            st.write(f"{idx}. {job.get('title', '')} | {job.get('location', '')} | {job.get('source', '')}")
+    else:
+        st.info("No direct ATS jobs found for this company with current location filter. Use the career page and ATS links above.")
+
+
 def render_inline_resume_builder():
     selected_job = st.session_state.get("jobfinder_selected_job")
     if not selected_job:
@@ -591,9 +720,11 @@ def render_job_finder():
                 st.error("Failed to generate suggestions. Please try again.")
             else:
                 st.markdown("---")
-                st.subheader("🎯 Suggested Target Companies")
+                live_jobs = collect_live_jobs(suggestions, filters)
+
+                st.subheader("🎯 Posted Jobs")
                 st.info(
-                    "These targets reflect your role, search filters, and visa constraints. Use the Google links to search company ATS boards directly instead of relying only on general job boards."
+                    "These are actual matching live postings found on supported ATS boards. Use the job actions below to apply or generate a tailored ATS resume directly for a specific listing."
                 )
 
                 active_filters = [
@@ -607,57 +738,20 @@ def render_job_finder():
                     active_filters.append(f"Mode: {', '.join(filters['job_modes'])}")
                 st.caption(" | ".join(active_filters))
 
-                for item in suggestions:
-                    company = item.get("company", "Unknown")
-                    reason = item.get("reason", "")
-                    sponsorship_signal = item.get("sponsorship_signal", "Unknown")
-                    visa_fit = item.get("visa_fit", "Confirm sponsorship details on the job posting.")
+                if live_jobs:
+                    st.success(f"Found {len(live_jobs)} live jobs across supported company ATS boards.")
+                    for idx, job in enumerate(live_jobs, start=1):
+                        render_job_listing(job, f"live_{idx}_{normalize_company_name(job.get('company', 'company'))}")
+                        st.markdown("---")
+                else:
+                    st.warning("No direct live jobs were found on supported ATS boards for the current filters. Company research links are shown below as fallback.")
 
-                    search_link = generate_google_dork(company, filters)
-                    ats_links = generate_ats_specific_links(company, filters)
-
-                    st.markdown(f"### **{company}**")
-                    st.markdown(f"*{reason}*")
-                    st.write(f"Sponsorship signal: {sponsorship_signal}")
-                    st.write(f"Visa note: {visa_fit}")
-                    st.markdown(f"[🔍 Search active {target_role} listings at {company} on Google]({search_link})")
-                    st.caption(
-                        " | ".join(
-                            [f"[{label}]({url})" for label, url in ats_links.items()]
-                        )
+                with st.expander("Company Research", expanded=not live_jobs):
+                    st.info(
+                        "These company targets reflect your role, search filters, and visa constraints. Use them when you want to broaden the search beyond the live ATS listings shown above."
                     )
-                    career_page = get_company_career_page(company, filters["role"], filters["location"])
-                    st.link_button("Company Career Page", career_page, use_container_width=True)
-
-                    live_jobs = fetch_live_jobs_for_company(company, filters["role"], filters["location"] if filters["strict_location"] else "")
-                    if live_jobs:
-                        st.success(f"Found {len(live_jobs)} location-matched live jobs for {company}.")
-                        for idx, job in enumerate(live_jobs[:4], start=1):
-                            st.write(f"{idx}. {job.get('title', '')} | {job.get('location', '')} | {job.get('source', '')}")
-                            job_col1, job_col2 = st.columns(2)
-                            with job_col1:
-                                st.link_button(
-                                    "Apply Now",
-                                    job.get("url") or career_page,
-                                    key=f"apply_{normalize_company_name(company)}_{idx}",
-                                    use_container_width=True,
-                                )
-                            with job_col2:
-                                if st.button(
-                                    "ATS Resume Generator",
-                                    key=f"resume_{normalize_company_name(company)}_{idx}",
-                                    use_container_width=True,
-                                ):
-                                    st.session_state.jobfinder_selected_job = {
-                                        "company": company,
-                                        "title": job.get("title", filters["role"]),
-                                        "location": job.get("location", filters["location"]),
-                                        "url": job.get("url", career_page),
-                                        "description": job.get("description", ""),
-                                    }
-                    else:
-                        st.info("No direct ATS jobs found for this company with current location filter. Use the career page and ATS links above.")
-
-                    st.markdown("---")
+                    for item in suggestions:
+                        render_company_suggestion_card(item, filters)
+                        st.markdown("---")
 
                 render_inline_resume_builder()
