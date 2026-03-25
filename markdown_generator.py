@@ -25,6 +25,38 @@ def parse_resume_date(raw):
     return datetime.min
 
 
+def format_resume_date(raw):
+    text = (raw or "").strip()
+    if not text:
+        return ""
+
+    if text.lower() in {"present", "current", "ongoing", "now"}:
+        return "Present"
+
+    formats = ["%b %Y", "%B %Y", "%b %d, %Y", "%B %d, %Y", "%Y-%m-%d", "%Y"]
+    for fmt in formats:
+        try:
+            parsed = datetime.strptime(text, fmt)
+            if fmt == "%Y":
+                return parsed.strftime("%Y")
+            return parsed.strftime("%b %Y")
+        except ValueError:
+            continue
+    return text
+
+
+def format_resume_date_range(start, end, default_end=""):
+    start_formatted = format_resume_date(start)
+    end_formatted = format_resume_date(end)
+
+    if not end_formatted and start_formatted and default_end:
+        end_formatted = default_end
+
+    if start_formatted and end_formatted:
+        return f"{start_formatted} - {end_formatted}"
+    return start_formatted or end_formatted
+
+
 def sort_experience(items):
     return sorted(
         items,
@@ -84,6 +116,8 @@ def create_markdown_resume(
     if profile.get("headline"):
         md.append(profile["headline"])
 
+    md.append("---")
+
     md.append("")
 
     section_order = get_effective_section_order(options.get("section_order"), variant_name)
@@ -103,12 +137,19 @@ def create_markdown_resume(
             md.append("## Professional Experience")
             for job in sort_experience(experience):
                 title_comp = f"**{job.get('title', '')}** at {job.get('company', '')}"
-                date_range = f"{job.get('start', '')} - {job.get('end', '')}"
+                date_range = format_resume_date_range(job.get("start", ""), job.get("end", ""), default_end="Present")
                 loc = extract_city_state(job.get('location', ''))
-                loc_date = f"*{loc} | {date_range}*" if loc else f"*{date_range}*"
+                loc_date = ""
+                if loc and date_range:
+                    loc_date = f"*{loc} | {date_range}*"
+                elif loc:
+                    loc_date = f"*{loc}*"
+                elif date_range:
+                    loc_date = f"*{date_range}*"
                 
                 md.append(f"### {title_comp}")
-                md.append(loc_date)
+                if loc_date:
+                    md.append(loc_date)
                 
                 bullets = job.get('bullets', [])[: variant_config.get("max_experience_bullets", 4)]
                 for bullet in bullets:
@@ -121,8 +162,9 @@ def create_markdown_resume(
             for proj in projects:
                 md.append(f"### **{proj.get('title', '')}**")
                 
-                date_range = f"*{proj.get('start', '')} - {proj.get('end', '')}*"
-                md.append(date_range)
+                date_range = format_resume_date_range(proj.get("start", ""), proj.get("end", ""), default_end="Present")
+                if date_range:
+                    md.append(f"*{date_range}*")
                 
                 bullets = proj.get('bullets', [])[: variant_config.get("max_project_bullets", 3)]
                 for bullet in bullets:
@@ -137,7 +179,7 @@ def create_markdown_resume(
                 if cert.get("authority"):
                     line += f" - {cert['authority']}"
                 if cert.get("start"):
-                    line += f" ({cert['start']})"
+                    line += f" ({format_resume_date(cert['start'])})"
                 md.append(f"- {line}")
             md.append("")
 
@@ -159,7 +201,7 @@ def create_markdown_resume(
             for item in volunteering[:3]:
                 role = item.get("role", "Volunteer")
                 company = item.get("company", "")
-                date_range = " - ".join(part for part in [item.get("start", ""), item.get("end", "Present")] if part)
+                date_range = format_resume_date_range(item.get("start", ""), item.get("end", ""), default_end="Present")
                 line = f"- {role} at {company}"
                 if date_range:
                     line += f" ({date_range})"
@@ -181,7 +223,7 @@ def create_markdown_resume(
                 degree = edu.get('degree', '').strip()
                 start = edu.get('start', '').strip()
                 end = edu.get('end', '').strip()
-                date_range = " - ".join(part for part in [start, end] if part)
+                date_range = format_resume_date_range(start, end)
 
                 if degree and date_range:
                     md.append(f"{degree} | {date_range}")

@@ -23,6 +23,41 @@ class ResumePDF(FPDF):
         # Optional: Add page numbers, though minimal resumes often don't need them
         pass
 
+
+def render_horizontal_rule(pdf):
+    y = pdf.get_y()
+    pdf.line(pdf.l_margin, y, pdf.w - pdf.r_margin, y)
+    pdf.ln(2)
+
+
+def render_meta_line(pdf, line_text):
+    text = line_text.strip()
+    if not text:
+        return
+
+    if ' | ' in text:
+        left_text, right_text = [part.strip() for part in text.rsplit(' | ', 1)]
+        if not right_text:
+            pdf.cell(0, 4, left_text, ln=True, align='L')
+            return
+
+        right_width = pdf.get_string_width(right_text)
+        available_width = pdf.w - pdf.l_margin - pdf.r_margin
+
+        if left_text:
+            left_width = max(0, available_width - right_width)
+            pdf.cell(left_width, 4, left_text, ln=0, align='L')
+            pdf.cell(right_width, 4, right_text, ln=True, align='R')
+        else:
+            pdf.cell(0, 4, right_text, ln=True, align='R')
+        return
+
+    if re.search(r'\b\d{4}\b|present', text, flags=re.IGNORECASE):
+        pdf.cell(0, 4, text, ln=True, align='R')
+        return
+
+    pdf.cell(0, 4, text, ln=True, align='L')
+
 def generate_pdf_from_markdown(markdown_text):
     """
     Parses an edited markdown string and generates a compact, minimal PDF.
@@ -55,6 +90,10 @@ def generate_pdf_from_markdown(markdown_text):
             pdf.set_font("helvetica", "B", 11)
             pdf.cell(0, 5, line_clean[3:], ln=True)
             pdf.ln(1)
+
+        elif line_clean in {'---', '***'}:
+            # Horizontal rules
+            render_horizontal_rule(pdf)
             
         elif line_clean.startswith('### '):
             # Job Titles / Schools / Projects
@@ -78,7 +117,7 @@ def generate_pdf_from_markdown(markdown_text):
         elif line_clean.startswith('*') and line_clean.endswith('*'):
             # Italicized dates/locations
             pdf.set_font("helvetica", "I", 10)
-            pdf.cell(0, 4, line_clean.replace('*', ''), ln=True)
+            render_meta_line(pdf, line_clean.replace('*', ''))
             
         else:
             # Regular body text (Summary, Skills, Degrees)
