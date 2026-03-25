@@ -8,6 +8,16 @@ from docx import Document
 
 from ai_helper import generate_json
 from matcher import extract_text_from_url
+from resume_formatter import get_resume_variant_names
+from tools.resume_generator import (
+    build_tailored_resume_from_jd,
+    generate_and_store_resume,
+    get_data,
+    get_default_sections_for_variant,
+    get_resume_section_choices,
+    render_generated_resume_panel,
+    save_generated_resume_state,
+)
 
 
 _STOPWORDS = {
@@ -756,12 +766,52 @@ def _render_low_score_resume_cta(results, jd_text):
         for item in seed["suggestions"]:
             st.write(f"- {item}")
 
+    data = get_data()
+    variant_name = st.selectbox("Resume variant", get_resume_variant_names(), key="scorer_resume_variant")
+    default_sections = get_default_sections_for_variant(data, variant_name)
+    selected_sections = st.multiselect(
+        "Sections to include",
+        get_resume_section_choices(),
+        default=default_sections,
+        key="scorer_resume_sections",
+    )
+    ctrl_col1, ctrl_col2, ctrl_col3 = st.columns(3)
+    with ctrl_col1:
+        max_exp_items = st.selectbox("Max experience entries", [2, 3], index=1, key="scorer_max_exp_items")
+    with ctrl_col2:
+        max_project_items = st.selectbox("Max project entries", [2, 3], index=1, key="scorer_max_project_items")
+    with ctrl_col3:
+        max_cert_items = st.selectbox("Max certifications", [2, 3], index=1, key="scorer_max_cert_items")
+
     if st.button("Generate New ATS Resume", key="generate_new_ats_resume", use_container_width=True):
-        st.session_state["resume_generator_jd_input"] = seed["jd_text"]
-        st.session_state["resume_generator_followup_suggestions"] = seed["suggestions"]
-        st.session_state["resume_generator_followup_role"] = seed["role_name"]
-        st.session_state["app_nav_selection"] = "AI Resume Generator"
-        st.rerun()
+        if not selected_sections:
+            st.warning("Select at least one resume section to generate a resume.")
+            return
+        with st.spinner("Generating a stronger ATS-targeted resume..."):
+            generate_and_store_resume(
+                prefix="scorer_followup",
+                jd_text=seed["jd_text"],
+                data=data,
+                variant_name=variant_name,
+                selected_sections=selected_sections,
+                role_name=seed["role_name"],
+                target_brief=seed["headline"],
+                max_exp_items=max_exp_items,
+                max_project_items=max_project_items,
+                max_cert_items=max_cert_items,
+                extra_ai_suggestions=seed["suggestions"],
+            )
+            st.session_state["scorer_followup_resume_target_brief"] = "\n".join([seed["headline"]] + [f"- {item}" for item in seed["suggestions"]])
+            st.success("ATS-targeted resume generated below. Review and download it from this page.")
+
+    render_generated_resume_panel(
+        prefix="scorer_followup",
+        review_title="Generated ATS Resume",
+        pdf_title="Download ATS Resume",
+        download_label="Download ATS 90+ Resume",
+        download_filename="ATS_90_Plus_Resume.pdf",
+        pdf_button_label="Generate ATS Resume PDF",
+    )
 
 
 def _decode_text_bytes(file_bytes):
@@ -852,7 +902,7 @@ def render_resume_scorer():
         
     if st.button("Score My Resume", use_container_width=True):
         if not uploaded_file:
-            st.warning("Please upload a PDF resume.")
+            st.warning("Please upload a resume file.")
             return
         if not jd_input.strip():
             st.warning("Please provide a Job Description.")

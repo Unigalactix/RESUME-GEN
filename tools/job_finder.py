@@ -3,10 +3,10 @@ import urllib.parse
 import json
 import requests
 from ai_helper import generate_json
-from matcher import extract_text_from_url
+from matcher import build_target_role_brief, extract_text_from_url
 from pdf_generator import generate_pdf_from_markdown
 from resume_formatter import get_resume_variant_names
-from tools.resume_generator import build_tailored_resume_from_jd, display_pdf_preview, get_data, get_default_sections_for_variant
+from tools.resume_generator import generate_and_store_resume, get_data, get_default_sections_for_variant, get_resume_section_choices, render_generated_resume_panel
 
 COMMON_ROLES = [
     "Software Engineer",
@@ -553,6 +553,20 @@ def render_company_suggestion_card(item, filters):
     st.caption(" | ".join([f"[{label}]({url})" for label, url in ats_links.items()]))
     st.markdown(f"[Company Career Page]({career_page})")
 
+    if st.button(
+        "Use Company Target For ATS Resume",
+        key=f"company_target_resume_{normalize_company_name(company)}",
+        use_container_width=True,
+    ):
+        st.session_state.jobfinder_selected_job = {
+            "company": company,
+            "title": filters["role"],
+            "location": filters["location"],
+            "url": career_page,
+            "description": build_target_role_brief(company, filters["role"], prefer_ai=False),
+        }
+        st.success(f"Loaded {company} as the ATS resume target below.")
+
     if live_jobs:
         st.success(f"Found {len(live_jobs)} location-matched live jobs for {company}.")
         for idx, job in enumerate(live_jobs[:MAX_LIVE_JOBS_PER_COMPANY], start=1):
@@ -577,12 +591,9 @@ def render_inline_resume_builder():
     data = get_data()
     variant_name = st.selectbox("Resume variant for this job", get_resume_variant_names(), key="jobfinder_resume_variant")
     default_sections = get_default_sections_for_variant(data, variant_name)
-    all_sections = [
-        "Summary", "Skills", "Experience", "Projects", "Certifications", "Publications", "Volunteering", "Languages", "Education"
-    ]
     selected_sections = st.multiselect(
         "Sections to include",
-        all_sections,
+        get_resume_section_choices(),
         default=default_sections,
         key="jobfinder_resume_sections",
     )
@@ -596,43 +607,26 @@ def render_inline_resume_builder():
             return
 
         with st.spinner("Generating ATS resume for this job..."):
-            package = build_tailored_resume_from_jd(
+            generate_and_store_resume(
+                prefix="jobfinder",
                 jd_text=jd_text,
                 data=data,
                 variant_name=variant_name,
                 selected_sections=selected_sections,
                 company_name=selected_job.get("company", ""),
                 role_name=selected_job.get("title", ""),
+                target_brief=jd_text if selected_job.get("description") else "",
             )
 
-            st.session_state.jobfinder_resume_md = package["resume_md"]
-            st.session_state.jobfinder_ai_suggestions = package.get("ai_suggestions", [])
-
-    if st.session_state.get("jobfinder_ai_suggestions"):
-        with st.expander("AI Suggestions For This Job", expanded=True):
-            for suggestion in st.session_state["jobfinder_ai_suggestions"]:
-                st.write(f"- {suggestion}")
-
-    if st.session_state.get("jobfinder_resume_md"):
-        edited_md = st.text_area(
-            "Generated ATS Resume (editable)",
-            value=st.session_state["jobfinder_resume_md"],
-            height=420,
-            key="jobfinder_resume_editor",
-        )
-        st.session_state.jobfinder_resume_md = edited_md
-
-        if st.button("Create PDF and Download", key="jobfinder_download_resume", use_container_width=True):
-            pdf_bytes = generate_pdf_from_markdown(st.session_state.jobfinder_resume_md)
-            st.download_button(
-                label="Download ATS Resume PDF",
-                data=pdf_bytes,
-                file_name="ATS_Tailored_Resume.pdf",
-                mime="application/pdf",
-                key="jobfinder_download_btn",
-            )
-            st.markdown("### PDF Preview")
-            display_pdf_preview(pdf_bytes)
+    render_generated_resume_panel(
+        prefix="jobfinder",
+        review_title="Generated ATS Resume (editable)",
+        pdf_title="Create PDF and Download",
+        editor_height=420,
+        download_label="Download ATS Resume PDF",
+        download_filename="ATS_Tailored_Resume.pdf",
+        pdf_button_label="Create PDF and Download",
+    )
 
 
 def render_job_finder():

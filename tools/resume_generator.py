@@ -97,6 +97,157 @@ def get_default_sections_for_variant(data, variant_name):
     ]
 
 
+def get_resume_section_choices():
+    return [section for section in get_section_order() if section != "Header"]
+
+
+def _resume_state_key(prefix, name):
+    return f"{prefix}_{name}" if prefix else name
+
+
+def save_generated_resume_state(
+    prefix,
+    package,
+    variant_name,
+    target_brief="",
+    company_name="",
+    role_name="",
+):
+    st.session_state[_resume_state_key(prefix, "ai_suggestions")] = package.get("ai_suggestions", [])
+    st.session_state[_resume_state_key(prefix, "resume_variant")] = variant_name
+    st.session_state[_resume_state_key(prefix, "resume_md")] = package["resume_md"]
+    st.session_state[_resume_state_key(prefix, "resume_editor")] = package["resume_md"]
+    st.session_state[_resume_state_key(prefix, "resume_target_brief")] = target_brief
+    st.session_state[_resume_state_key(prefix, "resume_target_company")] = company_name
+    st.session_state[_resume_state_key(prefix, "resume_target_role")] = role_name
+    st.session_state[_resume_state_key(prefix, "resume_selection_summary")] = (
+        package.get("selected_experience_count", 0),
+        package.get("selected_projects_count", 0),
+        package.get("selected_certifications_count", 0),
+    )
+    st.session_state[_resume_state_key(prefix, "selection_details")] = package.get("selection_details", {})
+
+
+def generate_and_store_resume(
+    prefix,
+    jd_text,
+    data,
+    variant_name,
+    selected_sections,
+    company_name="",
+    role_name="",
+    target_brief="",
+    max_exp_items=3,
+    max_project_items=3,
+    max_cert_items=3,
+    extra_ai_suggestions=None,
+):
+    package = build_tailored_resume_from_jd(
+        jd_text=jd_text,
+        data=data,
+        variant_name=variant_name,
+        selected_sections=selected_sections,
+        company_name=company_name,
+        role_name=role_name,
+        max_exp_items=max_exp_items,
+        max_project_items=max_project_items,
+        max_cert_items=max_cert_items,
+    )
+    if extra_ai_suggestions:
+        package["ai_suggestions"] = list(dict.fromkeys((extra_ai_suggestions or []) + package.get("ai_suggestions", [])))
+    save_generated_resume_state(
+        prefix=prefix,
+        package=package,
+        variant_name=variant_name,
+        target_brief=target_brief,
+        company_name=company_name,
+        role_name=role_name,
+    )
+    return package
+
+
+def render_generated_resume_panel(
+    prefix,
+    review_title="2. Review & Edit Resume (Markdown)",
+    pdf_title="3. View & Download PDF",
+    editor_label="Resume Content",
+    editor_height=600,
+    download_label="Download Tailored Resume",
+    download_filename="Tailored_Resume.pdf",
+    pdf_button_label="Generate Final PDF",
+):
+    resume_md_key = _resume_state_key(prefix, "resume_md")
+    if resume_md_key not in st.session_state:
+        return
+
+    st.subheader(review_title)
+
+    target_brief = st.session_state.get(_resume_state_key(prefix, "resume_target_brief"))
+    if target_brief:
+        company_name = st.session_state.get(_resume_state_key(prefix, "resume_target_company"), "Target company")
+        role_name = st.session_state.get(_resume_state_key(prefix, "resume_target_role"), "Target role")
+        with st.expander(f"Inferred target brief for {role_name} at {company_name}", expanded=False):
+            st.write(target_brief)
+
+    selection_summary = st.session_state.get(_resume_state_key(prefix, "resume_selection_summary"))
+    if selection_summary:
+        exp_count, project_count, cert_count = selection_summary
+        st.caption(
+            f"Selected {exp_count} experience entries, {project_count} projects, and {cert_count} certifications based on target keyword relevance."
+        )
+
+    details = st.session_state.get(_resume_state_key(prefix, "selection_details"))
+    if details:
+        with st.expander("🔍 Why these items were selected", expanded=False):
+            exp_items = details.get("experience", [])
+            proj_items = details.get("projects", [])
+            if exp_items:
+                st.markdown("**Experience entries selected**")
+                for item in exp_items:
+                    kws = ", ".join(item["matched_keywords"]) or "general relevance"
+                    st.write(f"- **{item['title']}** at {item['company']}: `{kws}`")
+            if proj_items:
+                st.markdown("**Projects selected**")
+                for item in proj_items:
+                    kws = ", ".join(item["matched_keywords"]) or "general relevance"
+                    st.write(f"- **{item['title']}**: `{kws}`")
+
+    ai_suggestions = st.session_state.get(_resume_state_key(prefix, "ai_suggestions"))
+    if ai_suggestions:
+        with st.expander("💡 AI Content Suggestions (Based on Role)", expanded=True):
+            st.info("Consider adding these keyword-rich bullet points into your experience section if they apply to you:")
+            for suggestion in ai_suggestions:
+                st.write(f"- {suggestion}")
+
+    st.info("You can edit the text below. The changes will be reflected in the final PDF.")
+
+    editor_key = _resume_state_key(prefix, "resume_editor")
+    if editor_key not in st.session_state:
+        st.session_state[editor_key] = st.session_state[resume_md_key]
+    edited_md = st.text_area(editor_label, height=editor_height, key=editor_key)
+    if edited_md != st.session_state[resume_md_key]:
+        st.session_state[resume_md_key] = edited_md
+
+    st.subheader(pdf_title)
+    if st.button(pdf_button_label, key=_resume_state_key(prefix, "generate_pdf")):
+        try:
+            with st.spinner("Generating minimal PDF..."):
+                pdf_bytes = generate_pdf_from_markdown(st.session_state[resume_md_key])
+
+            st.success("PDF generated successfully!")
+            st.download_button(
+                label=download_label,
+                data=pdf_bytes,
+                file_name=download_filename,
+                mime="application/pdf",
+                key=_resume_state_key(prefix, "download_btn"),
+            )
+            st.markdown("### PDF Preview")
+            display_pdf_preview(pdf_bytes)
+        except Exception as err:
+            st.error(f"Error generating PDF: {err}")
+
+
 def resolve_reference_value(custom_value, selected_value, placeholder):
     custom_clean = (custom_value or "").strip()
     if custom_clean:
@@ -234,7 +385,7 @@ def render_resume_generator():
         data = get_data()
         completeness = build_profile_completeness_report(data)
 
-    section_choices = [section for section in get_section_order() if section != "Header"]
+    section_choices = get_resume_section_choices()
     variant_name = st.selectbox("Resume variant", get_resume_variant_names())
     variant_guidance = get_resume_variant_guidance(variant_name)
     st.caption(variant_guidance["description"])
@@ -345,11 +496,13 @@ def render_resume_generator():
                     st.warning("Select at least one resume section to generate a resume.")
                     return
 
-                package = build_tailored_resume_from_jd(
+                generate_and_store_resume(
+                    prefix="resume",
                     jd_text=jd,
                     data=data,
                     variant_name=variant_name,
                     selected_sections=selected_sections,
+                    target_brief=target_brief,
                     company_name=company_name,
                     role_name=role_name,
                     max_exp_items=max_exp_items,
@@ -357,85 +510,8 @@ def render_resume_generator():
                     max_cert_items=max_cert_items,
                 )
 
-                st.session_state.ai_suggestions = package["ai_suggestions"]
-                st.session_state.resume_variant = variant_name
-                st.session_state.resume_md = package["resume_md"]
-                st.session_state.resume_target_brief = target_brief
-                st.session_state.resume_target_company = company_name
-                st.session_state.resume_target_role = role_name
-                st.session_state.resume_selection_summary = (
-                    package["selected_experience_count"],
-                    package["selected_projects_count"],
-                    package["selected_certifications_count"],
-                )
-                st.session_state.selection_details = package["selection_details"]
-
                 st.success("Analysis complete! Review and edit your resume below.")
                 st.session_state.pop("resume_generator_followup_suggestions", None)
                 st.session_state.pop("resume_generator_followup_role", None)
 
-    if 'resume_md' in st.session_state:
-        st.subheader("2. Review & Edit Resume (Markdown)")
-
-        if st.session_state.get("resume_target_brief"):
-            company_name = st.session_state.get("resume_target_company", "Target company")
-            role_name = st.session_state.get("resume_target_role", "Target role")
-            with st.expander(f"Inferred target brief for {role_name} at {company_name}", expanded=False):
-                st.write(st.session_state["resume_target_brief"])
-
-        if st.session_state.get("resume_selection_summary"):
-            exp_count, project_count, cert_count = st.session_state["resume_selection_summary"]
-            st.caption(
-                f"Selected {exp_count} experience entries, {project_count} projects, and {cert_count} certifications based on target keyword relevance."
-            )
-
-        if st.session_state.get("selection_details"):
-            details = st.session_state["selection_details"]
-            with st.expander("🔍 Why these items were selected", expanded=False):
-                exp_items = details.get("experience", [])
-                proj_items = details.get("projects", [])
-                if exp_items:
-                    st.markdown("**Experience entries selected**")
-                    for item in exp_items:
-                        kws = ", ".join(item["matched_keywords"]) or "general relevance"
-                        st.write(f"- **{item['title']}** at {item['company']}: `{kws}`")
-                if proj_items:
-                    st.markdown("**Projects selected**")
-                    for item in proj_items:
-                        kws = ", ".join(item["matched_keywords"]) or "general relevance"
-                        st.write(f"- **{item['title']}**: `{kws}`")
-
-        if st.session_state.get('ai_suggestions'):
-            with st.expander("💡 AI Content Suggestions (Based on Role)", expanded=True):
-                st.info("Consider adding these keyword-rich bullet points into your experience section if they apply to you:")
-                for s in st.session_state.ai_suggestions:
-                    st.write(f"- {s}")
-                    
-        st.info("You can edit the text below. The changes will be reflected in the final PDF.")
-        
-        edited_md = st.text_area("Resume Content", value=st.session_state.resume_md, height=600)
-        
-        if edited_md != st.session_state.resume_md:
-            st.session_state.resume_md = edited_md
-
-        st.subheader("3. View & Download PDF")
-        if st.button("Generate Final PDF"):
-            try:
-                with st.spinner("Generating minimal PDF..."):
-                    pdf_bytes = generate_pdf_from_markdown(st.session_state.resume_md)
-                    
-                st.success("PDF generated successfully!")
-                
-                st.download_button(
-                    label="Download Tailored Resume",
-                    data=pdf_bytes,
-                    file_name="Tailored_Resume.pdf",
-                    mime="application/pdf",
-                    key="download_btn" 
-                )
-                
-                st.markdown("### PDF Preview")
-                display_pdf_preview(pdf_bytes)
-                
-            except Exception as e:
-                st.error(f"Error generating PDF: {e}")
+    render_generated_resume_panel(prefix="resume")
