@@ -10,9 +10,12 @@ st.set_page_config(page_title="AI Career Suite", page_icon="🚀", layout="wide"
 ai_status = get_ai_status()
 data_inventory = get_data_inventory("Data")
 
+if st.session_state.get("app_nav_selection") in {"AI Resume Generator", "Resume Score"}:
+    st.session_state["app_nav_selection"] = "ATS Resume Studio"
+
 st.sidebar.title("Navigation")
 st.sidebar.markdown("Welcome to the AI Career Suite. Select a tool below:")
-selection = st.sidebar.radio("Go to:", ["AI Resume Generator", "Resume Score", "Find Jobs"], key="app_nav_selection")
+selection = st.sidebar.radio("Go to:", ["ATS Resume Studio", "Find Jobs"], key="app_nav_selection")
 
 st.sidebar.markdown("---")
 st.sidebar.info("💡 **Tip:** Use the AI Resume Generator to build a tailored PDF, then verify its impact with the Resume Score tool!")
@@ -34,9 +37,11 @@ if not ai_status["configured"]:
 if data_inventory["missing_required"]:
     st.warning("The app is missing required LinkedIn export files. Resume generation quality will be limited until the Data folder is complete.")
 
-if selection == "AI Resume Generator":
-    render_resume_generator()
-elif selection == "Resume Score":
-    render_resume_scorer()
+if selection == "ATS Resume Studio":
+    generator_tab, scorer_tab = st.tabs(["Generate Resume", "Score Resume"])
+    with generator_tab:
+        render_resume_generator()
+    with scorer_tab:
+        render_resume_scorer()
 elif selection == "Find Jobs":
     render_job_finder()

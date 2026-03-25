@@ -1,6 +1,8 @@
 import streamlit as st
 import urllib.parse
 import json
+import csv
+import os
 import requests
 from ai_helper import generate_json
 from matcher import build_target_role_brief, extract_text_from_url
@@ -489,6 +491,71 @@ def collect_live_jobs(suggestions, filters, max_jobs_per_company=MAX_LIVE_JOBS_P
     return collected
 
 
+def collect_linkedin_jobs(filters, suggestions, data_dir="Data/Jobs", max_total_jobs=20):
+    suggestion_by_company = {
+        normalize_company_name(item.get("company", "")): item
+        for item in suggestions
+        if item.get("company")
+    }
+    job_sources = [
+        ("Saved Jobs.csv", "Job Title", "Company Name", "Job Url", "LinkedIn Saved"),
+        ("Job Applications.csv", "Job Title", "Company Name", "Job Url", "LinkedIn Applied"),
+    ]
+    collected = []
+    seen = set()
+
+    for filename, title_key, company_key, url_key, source_label in job_sources:
+        path = os.path.join(data_dir, filename)
+        if not os.path.exists(path):
+            continue
+        with open(path, newline="", encoding="utf-8-sig") as handle:
+            reader = csv.DictReader(handle)
+            for row in reader:
+                title = (row.get(title_key) or "").strip()
+                company = (row.get(company_key) or "").strip()
+                url = (row.get(url_key) or "").strip()
+                if not title or not company:
+                    continue
+                if not role_matches(title, filters["role"]):
+                    continue
+                if filters.get("sponsor_only") and not is_known_h1b_sponsor(company):
+                    continue
+
+                dedupe_key = (normalize_company_name(company), title.lower(), url.lower())
+                if dedupe_key in seen:
+                    continue
+                seen.add(dedupe_key)
+
+                company_hint = suggestion_by_company.get(normalize_company_name(company), {})
+                career_page = get_company_career_page(company, filters["role"], filters["location"])
+                collected.append(
+                    {
+                        "company": company,
+                        "title": title,
+                        "location": filters.get("location", ""),
+                        "url": url or career_page,
+                        "description": "",
+                        "source": source_label,
+                        "reason": company_hint.get("reason", "Imported from your LinkedIn job history."),
+                        "sponsorship_signal": company_hint.get(
+                            "sponsorship_signal",
+                            "Known sponsor" if is_known_h1b_sponsor(company) else "Unknown",
+                        ),
+                        "visa_fit": company_hint.get(
+                            "visa_fit",
+                            "Confirm sponsorship details on the original listing.",
+                        ),
+                        "career_page": career_page,
+                        "search_link": generate_google_dork(company, filters),
+                        "ats_links": generate_ats_specific_links(company, filters),
+                    }
+                )
+                if len(collected) >= max_total_jobs:
+                    return collected
+
+    return collected
+
+
 def render_job_listing(job, index_prefix):
     title = job.get("title", "Role")
     company = job.get("company", "Company")
@@ -712,11 +779,20 @@ def render_job_finder():
                 st.error("Failed to generate suggestions. Please try again.")
             else:
                 st.markdown("---")
+                linkedin_jobs = collect_linkedin_jobs(filters, suggestions)
                 live_jobs = collect_live_jobs(suggestions, filters)
+                posted_jobs = linkedin_jobs + [
+                    job for job in live_jobs
+                    if (normalize_company_name(job.get("company", "")), job.get("title", "").lower(), job.get("url", "").lower())
+                    not in {
+                        (normalize_company_name(item.get("company", "")), item.get("title", "").lower(), item.get("url", "").lower())
+                        for item in linkedin_jobs
+                    }
+                ]
 
                 st.subheader("🎯 Posted Jobs")
                 st.info(
-                    "These are actual matching live postings found on supported ATS boards. Use the job actions below to apply or generate a tailored ATS resume directly for a specific listing."
+                    "These are matching jobs from supported ATS boards plus your LinkedIn Saved Jobs and Job Applications exports. Use the job actions below to apply or generate a tailored ATS resume directly for a specific listing."
                 )
 
                 active_filters = [
@@ -730,13 +806,15 @@ def render_job_finder():
                     active_filters.append(f"Mode: {', '.join(filters['job_modes'])}")
                 st.caption(" | ".join(active_filters))
 
-                if live_jobs:
-                    st.success(f"Found {len(live_jobs)} live jobs across supported company ATS boards.")
-                    for idx, job in enumerate(live_jobs, start=1):
+                if posted_jobs:
+                    st.success(
+                        f"Found {len(posted_jobs)} jobs total: {len(linkedin_jobs)} from LinkedIn exports and {len(live_jobs)} from supported ATS boards."
+                    )
+                    for idx, job in enumerate(posted_jobs, start=1):
                         render_job_listing(job, f"live_{idx}_{normalize_company_name(job.get('company', 'company'))}")
                         st.markdown("---")
                 else:
-                    st.warning("No direct live jobs were found on supported ATS boards for the current filters. Company research links are shown below as fallback.")
+                    st.warning("No matching LinkedIn or supported ATS jobs were found for the current filters. Company research links are shown below as fallback.")
 
                 with st.expander("Company Research", expanded=not live_jobs):
                     st.info(

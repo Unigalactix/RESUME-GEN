@@ -5,6 +5,7 @@ from markdown_generator import create_markdown_resume
 from pdf_generator import generate_pdf_from_markdown
 from resume_formatter import get_resume_variant_config, get_resume_variant_guidance, get_resume_variant_names, get_section_order
 from pdf2image import convert_from_bytes
+from tools.ats_scoring import get_resume_score, render_ats_report
 
 
 COMPANY_REFERENCE_OPTIONS = [
@@ -126,6 +127,8 @@ def save_generated_resume_state(
         package.get("selected_certifications_count", 0),
     )
     st.session_state[_resume_state_key(prefix, "selection_details")] = package.get("selection_details", {})
+    if "score_report" in package:
+        st.session_state[_resume_state_key(prefix, "resume_score_report")] = package["score_report"]
 
 
 def generate_and_store_resume(
@@ -155,6 +158,7 @@ def generate_and_store_resume(
     )
     if extra_ai_suggestions:
         package["ai_suggestions"] = list(dict.fromkeys((extra_ai_suggestions or []) + package.get("ai_suggestions", [])))
+    package["score_report"] = get_resume_score(package["resume_md"], jd_text)
     save_generated_resume_state(
         prefix=prefix,
         package=package,
@@ -179,6 +183,11 @@ def render_generated_resume_panel(
     resume_md_key = _resume_state_key(prefix, "resume_md")
     if resume_md_key not in st.session_state:
         return
+
+    score_report = st.session_state.get(_resume_state_key(prefix, "resume_score_report"))
+    if score_report:
+        st.subheader("Auto-Scored ATS Check")
+        render_ats_report(score_report)
 
     st.subheader(review_title)
 
