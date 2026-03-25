@@ -511,14 +511,12 @@ def render_job_listing(job, index_prefix):
         st.link_button(
             "Apply Now",
             job.get("url") or job.get("career_page") or "https://www.google.com",
-            key=f"apply_{index_prefix}",
             use_container_width=True,
         )
     with action_col2:
         st.link_button(
             "Search More",
             job.get("search_link") or job.get("career_page") or "https://www.google.com",
-            key=f"search_{index_prefix}",
             use_container_width=True,
         )
     with action_col3:
@@ -553,7 +551,7 @@ def render_company_suggestion_card(item, filters):
     st.write(f"Visa note: {visa_fit}")
     st.markdown(f"[🔍 Search active {filters['role']} listings at {company} on Google]({search_link})")
     st.caption(" | ".join([f"[{label}]({url})" for label, url in ats_links.items()]))
-    st.link_button("Company Career Page", career_page, key=f"career_{normalize_company_name(company)}", use_container_width=True)
+    st.markdown(f"[Company Career Page]({career_page})")
 
     if live_jobs:
         st.success(f"Found {len(live_jobs)} location-matched live jobs for {company}.")

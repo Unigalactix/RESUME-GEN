@@ -12,7 +12,7 @@ data_inventory = get_data_inventory("Data")
 
 st.sidebar.title("Navigation")
 st.sidebar.markdown("Welcome to the AI Career Suite. Select a tool below:")
-selection = st.sidebar.radio("Go to:", ["AI Resume Generator", "Resume Score", "Find Jobs"])
+selection = st.sidebar.radio("Go to:", ["AI Resume Generator", "Resume Score", "Find Jobs"], key="app_nav_selection")
 
 st.sidebar.markdown("---")
 st.sidebar.info("💡 **Tip:** Use the AI Resume Generator to build a tailored PDF, then verify its impact with the Resume Score tool!")

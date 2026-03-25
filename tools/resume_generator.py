@@ -227,6 +227,9 @@ def render_resume_generator():
         "Upload your LinkedIn export data into the `Data/` folder, then generate a tailored PDF resume from either a job description or a company-and-role target."
     )
 
+    if "resume_generator_jd_input" not in st.session_state:
+        st.session_state["resume_generator_jd_input"] = ""
+
     with st.spinner("Loading profile data..."):
         data = get_data()
         completeness = build_profile_completeness_report(data)
@@ -267,8 +270,20 @@ def render_resume_generator():
             st.write(f"- {item}")
 
     st.subheader("1. Enter Job Description or URL")
-    jd_input = st.text_area("Paste the Job Description text OR a link to the job posting:", height=200)
+    jd_input = st.text_area(
+        "Paste the Job Description text OR a link to the job posting:",
+        height=200,
+        key="resume_generator_jd_input",
+    )
     st.caption("If the application does not show a full job description, use the company and role inputs below instead.")
+
+    followup_suggestions = st.session_state.get("resume_generator_followup_suggestions", [])
+    if followup_suggestions:
+        role_name = st.session_state.get("resume_generator_followup_role", "this role") or "this role"
+        with st.expander(f"ATS 90+ improvement brief for {role_name}", expanded=True):
+            st.warning("These fixes came from the ATS score check. Use them while generating the next resume version.")
+            for item in followup_suggestions:
+                st.write(f"- {item}")
 
     st.subheader("2. Or build from company + role")
     st.caption("Choose a reference from the dropdowns or type your own values. The app will infer a compact target brief when no JD is available.")
@@ -356,6 +371,8 @@ def render_resume_generator():
                 st.session_state.selection_details = package["selection_details"]
 
                 st.success("Analysis complete! Review and edit your resume below.")
+                st.session_state.pop("resume_generator_followup_suggestions", None)
+                st.session_state.pop("resume_generator_followup_role", None)
 
     if 'resume_md' in st.session_state:
         st.subheader("2. Review & Edit Resume (Markdown)")

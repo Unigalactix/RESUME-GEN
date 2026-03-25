@@ -1,8 +1,10 @@
 import re
+from io import BytesIO
 from datetime import datetime
 
 import PyPDF2
 import streamlit as st
+from docx import Document
 
 from ai_helper import generate_json
 from matcher import extract_text_from_url
@@ -725,6 +727,109 @@ def _render_ats_report(results):
         for item in results["actionable_suggestions"]:
             st.write(f"- {item}")
 
+
+def _build_resume_generator_seed(results, jd_text):
+    suggestions = _dedupe_keep_order(
+        results.get("improvement_recommendations", [])
+        + results.get("rewrite_priorities", [])
+        + results.get("actionable_suggestions", [])
+    )[:8]
+    role_name = (results.get("target_role") or "").strip()
+    return {
+        "jd_text": (jd_text or "").strip(),
+        "role_name": role_name,
+        "suggestions": suggestions,
+        "headline": (
+            f"ATS score is {results.get('score', 0)}/100. Build a stronger targeted resume and address the gaps below to push toward 90+."
+        ),
+    }
+
+
+def _render_low_score_resume_cta(results, jd_text):
+    if results.get("score", 0) >= 90:
+        return
+
+    seed = _build_resume_generator_seed(results, jd_text)
+    st.warning("This resume is below the 90 ATS target. Generate a new tailored resume using the missing keywords and rewrite priorities below.")
+    with st.expander("ATS 90+ Resume Brief", expanded=True):
+        st.write(seed["headline"])
+        for item in seed["suggestions"]:
+            st.write(f"- {item}")
+
+    if st.button("Generate New ATS Resume", key="generate_new_ats_resume", use_container_width=True):
+        st.session_state["resume_generator_jd_input"] = seed["jd_text"]
+        st.session_state["resume_generator_followup_suggestions"] = seed["suggestions"]
+        st.session_state["resume_generator_followup_role"] = seed["role_name"]
+        st.session_state["app_nav_selection"] = "AI Resume Generator"
+        st.rerun()
+
+
+def _decode_text_bytes(file_bytes):
+    for encoding in ("utf-8-sig", "utf-8", "utf-16", "latin-1"):
+        try:
+            return file_bytes.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+    return file_bytes.decode("utf-8", errors="ignore")
+
+
+def _extract_pdf_text(file_bytes):
+    reader = PyPDF2.PdfReader(BytesIO(file_bytes))
+    pages = []
+    for page in reader.pages:
+        pages.append(page.extract_text() or "")
+    return "\n".join(pages).strip()
+
+
+def _extract_docx_text(file_bytes):
+    document = Document(BytesIO(file_bytes))
+    paragraphs = [paragraph.text.strip() for paragraph in document.paragraphs if paragraph.text.strip()]
+    return "\n".join(paragraphs).strip()
+
+
+def _extract_doc_text(file_bytes):
+    utf16_chunks = [
+        chunk.decode("utf-16le", errors="ignore").strip()
+        for chunk in re.findall(rb"(?:(?:[\x20-\x7e]\x00){4,})", file_bytes)
+    ]
+    ascii_chunks = [
+        chunk.decode("latin-1", errors="ignore").strip()
+        for chunk in re.findall(rb"[A-Za-z0-9 ,.;:()/#&+\-]{4,}", file_bytes)
+    ]
+
+    lines = []
+    seen = set()
+    for chunk in utf16_chunks + ascii_chunks:
+        normalized = _normalize_space(chunk)
+        if len(normalized) < 4:
+            continue
+        if normalized.lower() in seen:
+            continue
+        seen.add(normalized.lower())
+        lines.append(normalized)
+
+    return "\n".join(lines).strip()
+
+
+def extract_resume_text(uploaded_file):
+    file_name = (getattr(uploaded_file, "name", "") or "resume.pdf").lower()
+    file_bytes = uploaded_file.getvalue()
+
+    if file_name.endswith(".pdf"):
+        text = _extract_pdf_text(file_bytes)
+    elif file_name.endswith(".docx"):
+        text = _extract_docx_text(file_bytes)
+    elif file_name.endswith(".doc"):
+        text = _extract_doc_text(file_bytes)
+    elif file_name.endswith(".txt"):
+        text = _decode_text_bytes(file_bytes).strip()
+    else:
+        raise ValueError("Unsupported resume format. Please upload a PDF, DOC, DOCX, or TXT file.")
+
+    if not _normalize_space(text):
+        raise ValueError("The uploaded file did not contain readable text.")
+    return text
+
 def get_resume_score(resume_text, jd_text):
     """Build a deterministic ATS report and enrich it with AI suggestions when available."""
     local_report = _build_ats_report(resume_text, jd_text)
@@ -739,7 +844,7 @@ def render_resume_scorer():
     
     with col1:
         st.subheader("1. Upload Resume")
-        uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
+        uploaded_file = st.file_uploader("Choose a resume file", type=["pdf", "doc", "docx", "txt"])
         
     with col2:
         st.subheader("2. Job Description")
@@ -754,14 +859,10 @@ def render_resume_scorer():
             return
             
         with st.spinner("Analyzing your resume against the Job Description..."):
-            # Extract PDF Text
             try:
-                reader = PyPDF2.PdfReader(uploaded_file)
-                resume_text = ""
-                for page in reader.pages:
-                    resume_text += page.extract_text() + "\n"
+                resume_text = extract_resume_text(uploaded_file)
             except Exception as e:
-                st.error(f"Failed to read PDF: {e}")
+                st.error(f"Failed to read resume file: {e}")
                 return
                 
             # Process JD Input
@@ -779,3 +880,4 @@ def render_resume_scorer():
                 st.error(f"Error during AI analysis: {results['error']}")
             else:
                 _render_ats_report(results)
+                _render_low_score_resume_cta(results, jd)

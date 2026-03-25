@@ -1,6 +1,6 @@
 import unittest
 
-from tools.resume_scorer import _build_ats_report, _classify_keyword_hits, get_resume_score
+from tools.resume_scorer import _build_ats_report, _build_resume_generator_seed, _classify_keyword_hits, get_resume_score
 
 
 class ResumeScorerTests(unittest.TestCase):
@@ -47,6 +47,22 @@ class ResumeScorerTests(unittest.TestCase):
         self.assertIn("keyword_hits", report)
         self.assertIn("actionable_suggestions", report)
         self.assertNotIn("error", report)
+
+    def test_build_resume_generator_seed_includes_gap_fix_suggestions(self):
+        results = {
+            "score": 84,
+            "target_role": "Backend Engineer",
+            "improvement_recommendations": ["Add a concrete Kubernetes bullet."],
+            "rewrite_priorities": ["Rewrite one bullet to directly include Distributed Systems."],
+            "actionable_suggestions": ["Mirror the target role in the summary."],
+        }
+
+        seed = _build_resume_generator_seed(results, "JD text here")
+
+        self.assertEqual(seed["jd_text"], "JD text here")
+        self.assertEqual(seed["role_name"], "Backend Engineer")
+        self.assertEqual(len(seed["suggestions"]), 3)
+        self.assertIn("90+", seed["headline"])
 
 
 if __name__ == "__main__":
